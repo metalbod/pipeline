@@ -1,0 +1,11 @@
+select
+    entity_id,
+    local_account_code,
+    local_account_name,
+    group_standard_account_code,
+    effective_from,
+    effective_to,
+    is_active,
+    approved_by,
+    approved_at
+from {{ ref('seed_coa_mapping') }}

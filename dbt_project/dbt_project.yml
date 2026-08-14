@@ -1,0 +1,61 @@
+name: "finance_platform"
+version: "1.0.0"
+config-version: 2
+
+profile: "finance_platform"
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # Group-level reporting currency. FX translation logic lands in Phase 2 (dim_fx_rate,
+  # consolidation marts) -- recorded here now so that work has a single source of truth
+  # instead of rediscovering the decision. No conversion happens against this var yet.
+  group_reporting_currency: "MYR"
+
+models:
+  finance_platform:
+    silver:
+      +schema: silver
+      +materialized: table
+    # bronze/gold model configs (+schema, +materialized) land in Phase 1 once those
+    # directories hold actual models -- an empty config path here triggers a dbt warning.
+
+seeds:
+  finance_platform:
+    +schema: silver
+    seed_dim_entity:
+      +column_types:
+        entity_id: VARCHAR
+        entity_name: VARCHAR
+        parent_entity_id: VARCHAR
+        ownership_pct: DECIMAL(5, 2)
+        functional_currency: VARCHAR
+        country: VARCHAR
+        is_consolidated: BOOLEAN
+        effective_from: DATE
+        effective_to: DATE
+    seed_dim_account_group_standard:
+      +column_types:
+        group_standard_code: VARCHAR
+        account_name: VARCHAR
+        account_type: VARCHAR
+        account_subtype: VARCHAR
+        effective_from: DATE
+        effective_to: DATE
+    seed_coa_mapping:
+      +column_types:
+        entity_id: VARCHAR
+        local_account_code: VARCHAR
+        local_account_name: VARCHAR
+        group_standard_account_code: VARCHAR
+        effective_from: DATE
+        effective_to: DATE
+        is_active: BOOLEAN
+        approved_by: VARCHAR
+        approved_at: TIMESTAMP

@@ -1,0 +1,32 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+finance_platform.egg-info/
+
+# dbt
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+dbt_project/.user.yml
+dbt_project/package-lock.concurrent-update-lock
+
+# Dagster
+.dagster_home/
+dagster_project/**/__pycache__/
+
+# Local object storage stand-in + DuckDB
+storage/bronze/*
+!storage/bronze/.gitkeep
+storage/landing/*
+!storage/landing/.gitkeep
+storage/*.duckdb
+storage/*.duckdb.wal
+
+# Secrets / local env
+.env
+
+# OS
+.DS_Store

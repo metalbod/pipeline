@@ -1,0 +1,3 @@
+entity_id,entity_name,parent_entity_id,ownership_pct,functional_currency,country,is_consolidated,effective_from,effective_to
+MY-PARENT,Malaysia Parent Co,,100,MYR,MY,true,2026-08-14,
+SG-SUB,Singapore Subsidiary,MY-PARENT,100,SGD,SG,true,2026-08-14,

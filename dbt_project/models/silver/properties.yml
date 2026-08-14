@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: dim_entity
+    description: Entity master (Silver). Passthrough of seed_dim_entity.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+          - unique
+      - name: functional_currency
+        data_tests:
+          - not_null
+
+  - name: dim_account_group_standard
+    description: >
+      Group-standard chart of accounts (Silver), with a surrogate account_key for SCD Type 2
+      history. Empty until Finance populates seed_dim_account_group_standard.
+    columns:
+      - name: account_key
+        data_tests:
+          - not_null
+          - unique
+      - name: group_standard_code
+        data_tests:
+          - unique
+
+  - name: coa_mapping
+    description: >
+      Effective-dated entity-to-group-standard COA mapping (Silver). Empty until the first
+      mapping exercise; unmapped local accounts must fail loudly once Bronze journal data
+      exists (Phase 1), never be silently dropped (ARCHITECTURE.md §6.1).
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - entity_id
+              - local_account_code
+              - effective_from

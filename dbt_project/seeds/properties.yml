@@ -1,0 +1,35 @@
+version: 2
+
+seeds:
+  - name: seed_dim_entity
+    description: Governed entity master for pilot subsidiaries. Human-maintained CSV.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+          - unique
+      - name: functional_currency
+        data_tests:
+          - not_null
+
+  - name: seed_dim_account_group_standard
+    description: >
+      Group-standard chart of accounts. Owned by group finance, not derived automatically
+      (ARCHITECTURE.md §6.1) -- empty until Finance populates it.
+    columns:
+      - name: group_standard_code
+        data_tests:
+          - unique
+
+  - name: seed_coa_mapping
+    description: >
+      Effective-dated per-subsidiary COA mapping. Never auto-applied -- proposals from the
+      coa-mapper subagent are merged only after human approval in Finance (see CLAUDE.md).
+      Empty until the first mapping exercise.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - entity_id
+              - local_account_code
+              - effective_from
