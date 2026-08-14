@@ -12,7 +12,11 @@ source of truth for the tech stack, data model, and phased roadmap.
 - Orchestration: Dagster (`dagster dev` to run the UI locally)
 - Transformation: dbt-core on DuckDB (`dbt build`, `dbt test` from `/dbt_project`)
 - Ingestion: Python (polars, httpx) — one connector per source system/file type
-- Table format: Delta Lake (delta-rs) — confirm vs. Iceberg during Phase 0 if undecided
+- Table format: Delta Lake (delta-rs) — confirmed in Phase 1; Bronze tables are appended via
+  `deltalake.write_deltalake` and read by dbt-duckdb's `delta` plugin (`plugins: [{module: delta}]`
+  in `profiles.yml`). Bronze dbt models over a Delta source must be `+materialized: table`, never
+  `view` — the plugin registers an ephemeral in-process relation that a view's lazy re-query can't
+  see from a fresh connection.
 - Data quality: Pandera (dataframe contracts) + dbt tests (business rules)
 - Dashboards: Streamlit (`/dashboards/streamlit_app`) + Superset/Metabase for self-serve
 
@@ -22,6 +26,8 @@ source of truth for the tech stack, data model, and phased roadmap.
 - `cd dbt_project && dbt build` — run all transformations
 - `cd dbt_project && dbt test` — run all Silver/Gold data quality tests
 - `pytest data_quality/` — run Pandera schema tests
+- `pytest ingestion/` — run ingestion connector unit tests (mocked HTTP via `respx`, no live
+  credentials needed)
 
 # Non-negotiable rules
 

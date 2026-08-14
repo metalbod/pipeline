@@ -1,0 +1,107 @@
+{
+  "Id": "22222222-2222-2222-2222-222222222222",
+  "Status": "OK",
+  "ProviderName": "finance-platform",
+  "DateTimeUTC": "2026-08-14T00:00:00",
+  "Journals": [
+    {
+      "JournalID": "j1111111-0000-0000-0000-000000000001",
+      "JournalDate": "2026-07-05T00:00:00",
+      "JournalNumber": 1,
+      "CreatedDateUTC": "2026-07-05T09:12:00",
+      "Reference": "INV-1001",
+      "SourceID": "s1111111-0000-0000-0000-000000000001",
+      "SourceType": "ACCREC",
+      "JournalLines": [
+        {
+          "JournalLineID": "l1111111-0000-0000-0000-000000000001",
+          "AccountID": "a1111111-0000-0000-0000-000000000002",
+          "AccountCode": "610",
+          "AccountName": "Accounts Receivable",
+          "AccountType": "CURRENT",
+          "Description": "Invoice INV-1001 to Acme Sdn Bhd",
+          "NetAmount": 1000.00,
+          "GrossAmount": 1000.00,
+          "TaxAmount": 0.00
+        },
+        {
+          "JournalLineID": "l1111111-0000-0000-0000-000000000002",
+          "AccountID": "a1111111-0000-0000-0000-000000000005",
+          "AccountCode": "200",
+          "AccountName": "Sales",
+          "AccountType": "REVENUE",
+          "Description": "Invoice INV-1001 to Acme Sdn Bhd",
+          "NetAmount": -1000.00,
+          "GrossAmount": -1000.00,
+          "TaxAmount": 0.00
+        }
+      ]
+    },
+    {
+      "JournalID": "j1111111-0000-0000-0000-000000000002",
+      "JournalDate": "2026-07-20T00:00:00",
+      "JournalNumber": 2,
+      "CreatedDateUTC": "2026-07-20T14:30:00",
+      "Reference": "PMT-2001",
+      "SourceID": "s1111111-0000-0000-0000-000000000002",
+      "SourceType": "RECEIVE",
+      "JournalLines": [
+        {
+          "JournalLineID": "l1111111-0000-0000-0000-000000000003",
+          "AccountID": "a1111111-0000-0000-0000-000000000001",
+          "AccountCode": "090",
+          "AccountName": "Business Bank Account",
+          "AccountType": "BANK",
+          "Description": "Payment received for INV-1001",
+          "NetAmount": 1000.00,
+          "GrossAmount": 1000.00,
+          "TaxAmount": 0.00
+        },
+        {
+          "JournalLineID": "l1111111-0000-0000-0000-000000000004",
+          "AccountID": "a1111111-0000-0000-0000-000000000002",
+          "AccountCode": "610",
+          "AccountName": "Accounts Receivable",
+          "AccountType": "CURRENT",
+          "Description": "Payment received for INV-1001",
+          "NetAmount": -1000.00,
+          "GrossAmount": -1000.00,
+          "TaxAmount": 0.00
+        }
+      ]
+    },
+    {
+      "JournalID": "j1111111-0000-0000-0000-000000000003",
+      "JournalDate": "2026-07-28T00:00:00",
+      "JournalNumber": 3,
+      "CreatedDateUTC": "2026-07-28T11:05:00",
+      "Reference": "BILL-3001",
+      "SourceID": "s1111111-0000-0000-0000-000000000003",
+      "SourceType": "ACCPAY",
+      "JournalLines": [
+        {
+          "JournalLineID": "l1111111-0000-0000-0000-000000000005",
+          "AccountID": "a1111111-0000-0000-0000-000000000006",
+          "AccountCode": "400",
+          "AccountName": "Office Expenses",
+          "AccountType": "OVERHEADS",
+          "Description": "July office supplies",
+          "NetAmount": 250.50,
+          "GrossAmount": 250.50,
+          "TaxAmount": 0.00
+        },
+        {
+          "JournalLineID": "l1111111-0000-0000-0000-000000000006",
+          "AccountID": "a1111111-0000-0000-0000-000000000003",
+          "AccountCode": "800",
+          "AccountName": "Accounts Payable",
+          "AccountType": "CURRLIAB",
+          "Description": "July office supplies",
+          "NetAmount": -250.50,
+          "GrossAmount": -250.50,
+          "TaxAmount": 0.00
+        }
+      ]
+    }
+  ]
+}

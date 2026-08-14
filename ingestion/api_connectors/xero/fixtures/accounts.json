@@ -1,0 +1,62 @@
+{
+  "Id": "11111111-1111-1111-1111-111111111111",
+  "Status": "OK",
+  "ProviderName": "finance-platform",
+  "DateTimeUTC": "/Date(1755129600000)/",
+  "Accounts": [
+    {
+      "AccountID": "a1111111-0000-0000-0000-000000000001",
+      "Code": "090",
+      "Name": "Business Bank Account",
+      "Type": "BANK",
+      "TaxType": "NONE",
+      "Class": "ASSET",
+      "Status": "ACTIVE"
+    },
+    {
+      "AccountID": "a1111111-0000-0000-0000-000000000002",
+      "Code": "610",
+      "Name": "Accounts Receivable",
+      "Type": "CURRENT",
+      "TaxType": "NONE",
+      "Class": "ASSET",
+      "Status": "ACTIVE"
+    },
+    {
+      "AccountID": "a1111111-0000-0000-0000-000000000003",
+      "Code": "800",
+      "Name": "Accounts Payable",
+      "Type": "CURRLIAB",
+      "TaxType": "NONE",
+      "Class": "LIABILITY",
+      "Status": "ACTIVE"
+    },
+    {
+      "AccountID": "a1111111-0000-0000-0000-000000000004",
+      "Code": "960",
+      "Name": "Retained Earnings",
+      "Type": "EQUITY",
+      "TaxType": "NONE",
+      "Class": "EQUITY",
+      "Status": "ACTIVE"
+    },
+    {
+      "AccountID": "a1111111-0000-0000-0000-000000000005",
+      "Code": "200",
+      "Name": "Sales",
+      "Type": "REVENUE",
+      "TaxType": "NONE",
+      "Class": "REVENUE",
+      "Status": "ACTIVE"
+    },
+    {
+      "AccountID": "a1111111-0000-0000-0000-000000000006",
+      "Code": "400",
+      "Name": "Office Expenses",
+      "Type": "OVERHEADS",
+      "TaxType": "NONE",
+      "Class": "EXPENSE",
+      "Status": "ACTIVE"
+    }
+  ]
+}

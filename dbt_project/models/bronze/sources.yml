@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: bronze
+    meta:
+      plugin: delta
+    tables:
+      - name: journal_lines
+        meta:
+          delta_table_path: "{{ env_var('OBJECT_STORE_ROOT', '../storage') }}/bronze/journal_lines"
+      - name: accounts
+        meta:
+          delta_table_path: "{{ env_var('OBJECT_STORE_ROOT', '../storage') }}/bronze/accounts"

@@ -4,4 +4,10 @@ finance_platform:
     dev:
       type: duckdb
       path: "{{ env_var('DUCKDB_PATH', '../storage/warehouse.duckdb') }}"
-      threads: 4
+      # DuckDB doesn't support concurrent DDL (CREATE TABLE) across connections in the same
+      # schema -- multiple dbt threads racing to materialize models in one schema hit a
+      # "write-write conflict on create" catalog error. threads: 1 avoids that class of bug
+      # entirely; this is a known dbt-duckdb limitation, not specific to the delta plugin.
+      threads: 1
+      plugins:
+        - module: delta

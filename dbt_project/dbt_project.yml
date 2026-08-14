@@ -20,11 +20,19 @@ vars:
 
 models:
   finance_platform:
+    bronze:
+      +schema: bronze
+      # Must be `table`, not `view`: Bronze models select from Delta-plugin sources, which
+      # register an ephemeral in-process relation that only exists within the connection that
+      # loaded it. A view would re-run that lookup on a fresh connection and fail; `table`
+      # materializes the result once, for real, at build time.
+      +materialized: table
     silver:
       +schema: silver
       +materialized: table
-    # bronze/gold model configs (+schema, +materialized) land in Phase 1 once those
-    # directories hold actual models -- an empty config path here triggers a dbt warning.
+    gold:
+      +schema: gold
+      +materialized: table
 
 seeds:
   finance_platform:

@@ -27,6 +27,7 @@ storage/*.duckdb.wal
 
 # Secrets / local env
 .env
+.secrets/
 
 # OS
 .DS_Store

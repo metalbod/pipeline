@@ -1,0 +1,5 @@
+journal_id,line_no,account_code,account_name,debit_amount,credit_amount,currency,description,posted_at
+JE-0001,0,610,Accounts Receivable,1500.00,0.00,SGD,Invoice INV-2001 to Example Pte Ltd,2026-07-05
+JE-0001,1,200,Sales,0.00,1500.00,SGD,Invoice INV-2001 to Example Pte Ltd,2026-07-05
+JE-0002,0,400,Office Expenses,320.75,0.00,SGD,July office supplies,2026-07-18
+JE-0002,1,800,Accounts Payable,0.00,320.75,SGD,July office supplies,2026-07-18

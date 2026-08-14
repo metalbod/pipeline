@@ -1,1 +1,11 @@
 entity_id,local_account_code,local_account_name,group_standard_account_code,effective_from,effective_to,is_active,approved_by,approved_at
+MY-PARENT,090,Business Bank Account,GS-1000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+MY-PARENT,610,Accounts Receivable,GS-1100,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+MY-PARENT,800,Accounts Payable,GS-2000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+MY-PARENT,960,Retained Earnings,GS-3000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+MY-PARENT,200,Sales,GS-4000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+MY-PARENT,400,Office Expenses,GS-5000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+SG-SUB,610,Accounts Receivable,GS-1100,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+SG-SUB,200,Sales,GS-4000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+SG-SUB,400,Office Expenses,GS-5000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+SG-SUB,800,Accounts Payable,GS-2000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00

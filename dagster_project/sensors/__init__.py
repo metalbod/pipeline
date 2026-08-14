@@ -1,2 +1,3 @@
-# Phase 1: a sensor watching the landing/{entity_id}/{doctype}/ drop zone
-# (ARCHITECTURE.md §5) to trigger file ingestion on new uploads.
+from .file_sensor import sg_sub_journal_file_sensor
+
+__all__ = ["sg_sub_journal_file_sensor"]

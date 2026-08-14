@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: fct_balance
+    description: >
+      Derived entity/account/period balance summary (Gold) -- ARCHITECTURE.md §6.2. Computed
+      for every account_type uniformly so the balance-sheet-equation test can use it directly.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: account_key
+        data_tests:
+          - not_null
+      - name: period_key
+        data_tests:
+          - not_null
+      - name: closing_balance
+        data_tests:
+          - not_null
+
+  - name: rpt_balance_sheet
+    description: >
+      Unconsolidated balance sheet per entity/period -- what the Streamlit dashboard queries
+      directly. Includes a computed "Current Period Earnings" row (unclosed revenue/expense
+      folded into equity for display); see the model's header comment.
+
+  - name: rpt_profit_and_loss
+    description: Unconsolidated P&L per entity/period -- period_movement, not a cumulative balance.

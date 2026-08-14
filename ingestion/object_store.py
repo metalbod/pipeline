@@ -34,5 +34,15 @@ def bronze_api_path(source_system: str, entity_id: str, endpoint: str, load_date
     return os.path.join(store_root(), "bronze", "api", source_system, entity_id, endpoint, load_date)
 
 
+def bronze_file_path(entity_id: str, doctype: str) -> str:
+    return os.path.join(store_root(), "bronze", "file", entity_id, doctype)
+
+
+def bronze_delta_table_path(domain: str) -> str:
+    """Path for a domain-level Delta table that Bronze data from *any* source
+    (API or file) is appended into -- see ingestion/delta_writer.py."""
+    return os.path.join(store_root(), "bronze", domain)
+
+
 def landing_path(entity_id: str, doctype: str) -> str:
     return os.path.join(store_root(), "landing", entity_id, doctype)

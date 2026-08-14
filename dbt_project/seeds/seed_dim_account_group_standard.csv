@@ -1,1 +1,7 @@
 group_standard_code,account_name,account_type,account_subtype,effective_from,effective_to
+GS-1000,Cash and Bank,ASSET,Cash & Equivalents,2026-08-14,
+GS-1100,Accounts Receivable,ASSET,Trade Receivables,2026-08-14,
+GS-2000,Accounts Payable,LIABILITY,Trade Payables,2026-08-14,
+GS-3000,Retained Earnings,EQUITY,Retained Earnings,2026-08-14,
+GS-4000,Sales Revenue,REVENUE,Operating Revenue,2026-08-14,
+GS-5000,Office Expenses,EXPENSE,Operating Expenses,2026-08-14,
