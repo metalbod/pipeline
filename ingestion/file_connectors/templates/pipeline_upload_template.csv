@@ -1,0 +1,5 @@
+period,pipeline_stage,deal_count,total_contract_value,currency
+2026-07,Prospecting,5,25000.00,SGD
+2026-07,Qualification,3,18000.00,SGD
+2026-07,Proposal,2,12000.00,SGD
+2026-07,ClosedWon,1,4500.00,SGD

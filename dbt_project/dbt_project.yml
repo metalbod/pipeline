@@ -37,6 +37,17 @@ models:
 seeds:
   finance_platform:
     +schema: silver
+    seed_debt_covenants:
+      +column_types:
+        entity_id: VARCHAR
+        facility_name: VARCHAR
+        covenant_type: VARCHAR
+        threshold_value: DECIMAL(18, 4)
+        currency: VARCHAR
+        effective_from: DATE
+        effective_to: DATE
+        approved_by: VARCHAR
+        approved_at: TIMESTAMP
     seed_dim_entity:
       +column_types:
         entity_id: VARCHAR

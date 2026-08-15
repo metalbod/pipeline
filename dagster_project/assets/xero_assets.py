@@ -20,3 +20,40 @@ def xero_journals_bronze(context: dg.AssetExecutionContext, xero: XeroClientReso
     return dg.MaterializeResult(
         metadata={"row_count": result["row_count"], "batch_id": result["batch_id"], "path": result["path"]}
     )
+
+
+@dg.asset(
+    group_name="bronze_xero",
+    description="Xero GET /Reports/AgedReceivablesByContact (MY-PARENT) -> Bronze",
+)
+def xero_aged_receivables_bronze(
+    context: dg.AssetExecutionContext, xero: XeroClientResource
+) -> dg.MaterializeResult:
+    with xero.get_client() as client:
+        result = ingest.ingest_aged_receivables(client)
+    return dg.MaterializeResult(
+        metadata={"row_count": result["row_count"], "batch_id": result["batch_id"], "path": result["path"]}
+    )
+
+
+@dg.asset(
+    group_name="bronze_xero",
+    description="Xero GET /Reports/AgedPayablesByContact (MY-PARENT) -> Bronze",
+)
+def xero_aged_payables_bronze(
+    context: dg.AssetExecutionContext, xero: XeroClientResource
+) -> dg.MaterializeResult:
+    with xero.get_client() as client:
+        result = ingest.ingest_aged_payables(client)
+    return dg.MaterializeResult(
+        metadata={"row_count": result["row_count"], "batch_id": result["batch_id"], "path": result["path"]}
+    )
+
+
+@dg.asset(group_name="bronze_xero", description="Xero GET /Reports/BudgetSummary (MY-PARENT) -> Bronze")
+def xero_budget_bronze(context: dg.AssetExecutionContext, xero: XeroClientResource) -> dg.MaterializeResult:
+    with xero.get_client() as client:
+        result = ingest.ingest_budget_summary(client)
+    return dg.MaterializeResult(
+        metadata={"row_count": result["row_count"], "batch_id": result["batch_id"], "path": result["path"]}
+    )

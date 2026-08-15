@@ -4,10 +4,16 @@ from dagster_dbt import DbtCliResource
 from . import schedules, sensors
 from .assets import (
     dbt_project,
+    file_upload_aging_bronze,
+    file_upload_budget_bronze,
     file_upload_journal_bronze,
+    file_upload_pipeline_bronze,
     finance_platform_dbt_assets,
     openmetadata_dbt_catalog_sync,
     xero_accounts_bronze,
+    xero_aged_payables_bronze,
+    xero_aged_receivables_bronze,
+    xero_budget_bronze,
     xero_journals_bronze,
 )
 from .resources import XeroClientResource
@@ -17,10 +23,22 @@ defs = Definitions(
         finance_platform_dbt_assets,
         xero_accounts_bronze,
         xero_journals_bronze,
+        xero_aged_receivables_bronze,
+        xero_aged_payables_bronze,
+        xero_budget_bronze,
         file_upload_journal_bronze,
+        file_upload_pipeline_bronze,
+        file_upload_aging_bronze,
+        file_upload_budget_bronze,
         openmetadata_dbt_catalog_sync,
     ],
-    sensors=[sensors.sg_sub_journal_file_sensor, sensors.email_on_run_failure],
+    sensors=[
+        sensors.sg_sub_journal_file_sensor,
+        sensors.pipeline_file_sensor,
+        sensors.sg_sub_aging_file_sensor,
+        sensors.sg_sub_budget_file_sensor,
+        sensors.email_on_run_failure,
+    ],
     schedules=[schedules.xero_daily_schedule, schedules.late_file_arrival_schedule],
     resources={
         "dbt": DbtCliResource(project_dir=dbt_project),

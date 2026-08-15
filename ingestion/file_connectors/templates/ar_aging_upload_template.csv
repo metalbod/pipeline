@@ -1,0 +1,2 @@
+invoice_id,contact_name,invoice_date,due_date,amount_outstanding,currency
+INV-2001,Example Pte Ltd,2026-07-05,2026-08-04,1500.00,SGD

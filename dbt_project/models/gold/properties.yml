@@ -1,12 +1,106 @@
 version: 2
 
 models:
+  - name: rpt_gross_margin
+    description: >
+      (Revenue - COGS) / Revenue by entity/period. Reads 0% COGS / 100% margin until Finance
+      posts to a COGS-classified account (GS-5100) in Xero or SG-SUB -- neither source has one
+      today. Deliberately not wired into Superset yet (see ops/superset/build_cfo_dashboard.py
+      header) -- a permanently-100% chart would be misleading.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: revenue
+        data_tests:
+          - not_null
+
+  - name: rpt_covenant_headroom
+    description: >
+      Actual debt-to-equity ratio vs. seeded covenant threshold, headroom %, breach flag. Empty
+      today -- debt_covenants (Silver) has zero rows until a real facility exists. Effective-dated
+      against the covenant's [effective_from, effective_to) window so a future covenant can't
+      retroactively flag past periods. Deliberately not wired into Superset yet, same reasoning
+      as rpt_gross_margin.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: actual_debt_to_equity_ratio
+        data_tests:
+          - not_null
+
+  - name: rpt_dso_dpo
+    description: >
+      Two figures side by side: dso_days_approx/dpo_days_approx (balance-based approximation,
+      the original CFO-dashboard metric) and dso_days_true/dpo_days_true (invoice-weighted
+      average days outstanding from stg_ar_aging/stg_ap_aging) -- both labeled so a reader isn't
+      misled about which is which.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+
+  - name: rpt_top_overdue_receivables
+    description: Open AR invoices past due, ranked by amount outstanding per entity.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: invoice_id
+        data_tests:
+          - not_null
+      - name: days_overdue
+        data_tests:
+          - not_null
+
+  - name: rpt_budget_variance
+    description: >
+      Budgeted vs. actual by entity/account/period. is_major_variance flags anything more than
+      15% off budget -- a first-cut default threshold, not an established convention.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: group_standard_code
+        data_tests:
+          - not_null
+      - name: budgeted_amount
+        data_tests:
+          - not_null
+
+  - name: rpt_sales_pipeline_velocity
+    description: >
+      Finance-entered sales-pipeline estimate (Gold), not live CRM data -- see
+      stg_pipeline_snapshot.sql. TCV/deal count by stage/period per entity, with a
+      period-over-period TCV delta to surface slowdowns.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: pipeline_stage
+        data_tests:
+          - not_null
+      - name: total_contract_value
+        data_tests:
+          - not_null
+
   - name: fct_balance
     description: >
       Derived entity/account/period balance summary (Gold) -- ARCHITECTURE.md §6.2. Computed
       for every account_type uniformly so the balance-sheet-equation test can use it directly.
       Grain includes counterparty_entity_id (null except for intercompany accounts) so
-      fact_intercompany_elimination can select straight off this model.
+      fact_intercompany_elimination can select straight off this model. Forward-fills
+      zero-movement periods (Phase 5) via a cross-join grid -- flagged in finance-reviewer pass
+      as needing a grain uniqueness test given the added join complexity.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - entity_id
+              - account_key
+              - period_key
+              - counterparty_entity_id
     columns:
       - name: entity_id
         data_tests:

@@ -1,0 +1,52 @@
+{
+  "Reports": [
+    {
+      "ReportID": "BudgetSummary",
+      "ReportName": "Budget Summary",
+      "ReportType": "BudgetSummary",
+      "ReportDate": "31 July 2026",
+      "Rows": [
+        { "RowType": "Header", "Cells": [{ "Value": "Account" }, { "Value": "Jul-26" }] },
+        {
+          "RowType": "Section",
+          "Title": "Revenue",
+          "Rows": [
+            {
+              "RowType": "Row",
+              "Cells": [
+                {
+                  "Value": "Sales",
+                  "Attributes": [{ "Id": "account", "Value": "200" }]
+                },
+                { "Value": "1200.00" }
+              ]
+            }
+          ]
+        },
+        {
+          "RowType": "Section",
+          "Title": "Operating Expenses",
+          "Rows": [
+            {
+              "RowType": "Row",
+              "Cells": [
+                {
+                  "Value": "Office Expenses",
+                  "Attributes": [{ "Id": "account", "Value": "400" }]
+                },
+                { "Value": "300.00" }
+              ]
+            }
+          ]
+        },
+        {
+          "RowType": "Section",
+          "Title": "Totals",
+          "Rows": [
+            { "RowType": "SummaryRow", "Cells": [{ "Value": "" }, { "Value": "900.00" }] }
+          ]
+        }
+      ]
+    }
+  ]
+}

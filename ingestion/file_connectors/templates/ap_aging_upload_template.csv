@@ -1,0 +1,2 @@
+invoice_id,contact_name,invoice_date,due_date,amount_outstanding,currency
+BILL-2002,Singapore Office Supplies Pte Ltd,2026-07-18,2026-08-17,320.75,SGD

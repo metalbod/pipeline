@@ -1,0 +1,49 @@
+{
+  "Reports": [
+    {
+      "ReportID": "AgedPayablesByContact",
+      "ReportName": "Aged Payables By Contact",
+      "ReportType": "AgedPayablesByContact",
+      "ReportDate": "31 July 2026",
+      "Rows": [
+        {
+          "RowType": "Header",
+          "Cells": [
+            { "Value": "Reference" },
+            { "Value": "Date" },
+            { "Value": "Due Date" },
+            { "Value": "Total" }
+          ]
+        },
+        {
+          "RowType": "Section",
+          "Title": "Office Supplies Co",
+          "Rows": [
+            {
+              "RowType": "Row",
+              "Cells": [
+                { "Value": "BILL-3001" },
+                { "Value": "2026-07-28" },
+                { "Value": "2026-08-27" },
+                {
+                  "Value": "250.50",
+                  "Attributes": [{ "Id": "invoiceID", "Value": "bill-uuid-3001" }]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "RowType": "Section",
+          "Title": "Totals",
+          "Rows": [
+            {
+              "RowType": "SummaryRow",
+              "Cells": [{ "Value": "" }, { "Value": "" }, { "Value": "" }, { "Value": "250.50" }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -44,3 +44,28 @@ def fetch_all_journals(client: httpx.Client, since_journal_number: Optional[int]
         if len(page) < JOURNALS_PAGE_SIZE:
             break
     return all_journals
+
+
+def fetch_aged_receivables(client: httpx.Client, report_date: Optional[str] = None) -> dict:
+    """GET /Reports/AgedReceivablesByContact -- open AR invoices grouped by customer, for true
+    DSO/Top-Overdue-Receivables (not the balance-based approximation). `report_date` is
+    'YYYY-MM-DD'; Xero defaults to end of current month if omitted."""
+    params = {"reportDate": report_date} if report_date else {}
+    response = client.get("/Reports/AgedReceivablesByContact", params=params)
+    response.raise_for_status()
+    return response.json()
+
+
+def fetch_aged_payables(client: httpx.Client, report_date: Optional[str] = None) -> dict:
+    """GET /Reports/AgedPayablesByContact -- open AP bills grouped by vendor, for true DPO."""
+    params = {"reportDate": report_date} if report_date else {}
+    response = client.get("/Reports/AgedPayablesByContact", params=params)
+    response.raise_for_status()
+    return response.json()
+
+
+def fetch_budget_summary(client: httpx.Client) -> dict:
+    """GET /Reports/BudgetSummary -- monthly budget projections, for budget-vs-actual variance."""
+    response = client.get("/Reports/BudgetSummary")
+    response.raise_for_status()
+    return response.json()

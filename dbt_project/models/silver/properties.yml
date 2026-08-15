@@ -1,6 +1,86 @@
 version: 2
 
 models:
+  - name: stg_pipeline_snapshot
+    description: >
+      Finance-entered sales-pipeline estimate (Silver), not live CRM data -- see
+      ingestion/file_connectors/pipeline_file_reader.py. Deduped on
+      (source_system, entity_id, period, pipeline_stage).
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: period_key
+        data_tests:
+          - not_null
+      - name: pipeline_stage
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Prospecting
+                  - Qualification
+                  - Proposal
+                  - Negotiation
+                  - ClosedWon
+
+  - name: stg_ar_aging
+    description: >
+      Open AR invoices (Silver), converged from Xero's AgedReceivablesByContact report and
+      SG-SUB's ar_aging file upload. days_overdue/aging_bucket recomputed fresh each run.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: source_record_id
+        data_tests:
+          - not_null
+      - name: amount_outstanding
+        data_tests:
+          - not_null
+
+  - name: stg_ap_aging
+    description: >
+      Open AP bills (Silver), converged from Xero's AgedPayablesByContact report and SG-SUB's
+      ap_aging file upload. Same shape/logic as stg_ar_aging.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: amount_outstanding
+        data_tests:
+          - not_null
+
+  - name: stg_budget
+    description: >
+      Budgeted amounts (Silver), converged from Xero's BudgetSummary report and SG-SUB's budget
+      file upload, mapped through the existing coa_mapping table onto group_standard_code so
+      rpt_budget_variance.sql can compare like-for-like against actuals.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: group_standard_code
+        data_tests:
+          - not_null
+      - name: budgeted_amount
+        data_tests:
+          - not_null
+
+  - name: debt_covenants
+    description: >
+      Governed debt-covenant terms (Finance-maintained), same pattern as
+      intercompany_accounts.sql. Empty today -- no real debt facility exists yet; ready for
+      Finance to populate once one does.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - entity_id
+              - facility_name
+              - effective_from
+
   - name: dim_entity
     description: Entity master (Silver). Passthrough of seed_dim_entity.
     columns:

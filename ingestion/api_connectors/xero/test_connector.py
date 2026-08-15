@@ -103,3 +103,65 @@ def test_xero_datetime_handles_dotnet_and_iso_formats():
     iso = normalize._xero_datetime("2026-07-05T09:12:00")
     assert dotnet.year == 2025
     assert iso.year == 2026
+
+
+@respx.mock
+def test_fetch_aged_receivables():
+    respx.get(f"{API_BASE}/Reports/AgedReceivablesByContact").mock(
+        return_value=httpx.Response(200, json=_load_fixture("aged_receivables.json"))
+    )
+    with _client() as client:
+        report = connector.fetch_aged_receivables(client)
+    assert report["Reports"][0]["ReportType"] == "AgedReceivablesByContact"
+
+
+@respx.mock
+def test_fetch_aged_payables():
+    respx.get(f"{API_BASE}/Reports/AgedPayablesByContact").mock(
+        return_value=httpx.Response(200, json=_load_fixture("aged_payables.json"))
+    )
+    with _client() as client:
+        report = connector.fetch_aged_payables(client)
+    assert report["Reports"][0]["ReportType"] == "AgedPayablesByContact"
+
+
+@respx.mock
+def test_fetch_budget_summary():
+    respx.get(f"{API_BASE}/Reports/BudgetSummary").mock(
+        return_value=httpx.Response(200, json=_load_fixture("budget_summary.json"))
+    )
+    with _client() as client:
+        report = connector.fetch_budget_summary(client)
+    assert report["Reports"][0]["ReportType"] == "BudgetSummary"
+
+
+def test_normalize_aged_receivables_shape():
+    raw = _load_fixture("aged_receivables.json")
+    table = normalize.normalize_aged_receivables(raw, "MY-PARENT", "batch-1")
+    assert table.num_rows == 1
+    row = table.to_pylist()[0]
+    assert row["entity_id"] == "MY-PARENT"
+    assert row["contact_name"] == "Beta Industries Sdn Bhd"
+    assert row["source_record_id"] == "inv-uuid-1002"
+    assert row["amount_outstanding"] == 800.0
+    assert row["due_date"].isoformat() == "2026-07-31"
+
+
+def test_normalize_aged_payables_shape():
+    raw = _load_fixture("aged_payables.json")
+    table = normalize.normalize_aged_payables(raw, "MY-PARENT", "batch-1")
+    assert table.num_rows == 1
+    row = table.to_pylist()[0]
+    assert row["contact_name"] == "Office Supplies Co"
+    assert row["amount_outstanding"] == 250.5
+
+
+def test_normalize_budget_summary_shape():
+    raw = _load_fixture("budget_summary.json")
+    table = normalize.normalize_budget_summary(raw, "MY-PARENT", "batch-1", "2026-07")
+    rows = table.to_pylist()
+    assert len(rows) == 2
+    sales = next(r for r in rows if r["account_code"] == "200")
+    assert sales["account_name"] == "Sales"
+    assert sales["budgeted_amount"] == 1200.0
+    assert sales["period"] == "2026-07"

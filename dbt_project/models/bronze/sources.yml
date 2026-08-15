@@ -11,3 +11,15 @@ sources:
       - name: accounts
         meta:
           delta_table_path: "{{ env_var('OBJECT_STORE_ROOT', '../storage') }}/bronze/accounts"
+      - name: pipeline_snapshot
+        meta:
+          delta_table_path: "{{ env_var('OBJECT_STORE_ROOT', '../storage') }}/bronze/pipeline_snapshot"
+      - name: ar_aging
+        meta:
+          delta_table_path: "{{ env_var('OBJECT_STORE_ROOT', '../storage') }}/bronze/ar_aging"
+      - name: ap_aging
+        meta:
+          delta_table_path: "{{ env_var('OBJECT_STORE_ROOT', '../storage') }}/bronze/ap_aging"
+      - name: budget
+        meta:
+          delta_table_path: "{{ env_var('OBJECT_STORE_ROOT', '../storage') }}/bronze/budget"
