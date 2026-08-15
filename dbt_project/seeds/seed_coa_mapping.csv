@@ -12,3 +12,77 @@ SG-SUB,800,Accounts Payable,GS-2000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:
 MY-PARENT,1900,Intercompany Receivable - SG-SUB,GS-1900,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
 SG-SUB,1000,Bank Account,GS-1000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
 SG-SUB,1900,Intercompany Payable - MY-PARENT,GS-2900,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+MY-SUB-01,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-01,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-01,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-01,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-01,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-01,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-01,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-02,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-02,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-02,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-02,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-02,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-02,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-02,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-03,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-03,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-03,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-03,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-03,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-03,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-03,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-04,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-04,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-04,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-04,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-04,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-04,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-04,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-05,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-05,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-05,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-05,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-05,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-05,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-05,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-06,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-06,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-06,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-06,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-06,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-06,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-06,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-07,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-07,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-07,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-07,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-07,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-07,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-07,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-08,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-08,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-08,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-08,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-08,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-08,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-08,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-02,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-02,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-02,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-02,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-02,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-02,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-02,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-03,1000,Bank Account,GS-1000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-03,610,Accounts Receivable,GS-1100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-03,800,Accounts Payable,GS-2000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-03,200,Sales,GS-4000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-03,400,Office Expenses,GS-5000,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-03,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-03,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-PARENT,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+MY-PARENT,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB,500,Cost of Goods Sold,GS-5100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB,2100,External Bank Loans,GS-2100,2026-08-15,,true,Kenneth Yong,2026-08-15T00:00:00

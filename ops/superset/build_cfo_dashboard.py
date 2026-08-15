@@ -33,6 +33,10 @@ REGIONAL_CONTROLLER_ROLE = "Regional Controller"
 # (schema, table_name) for a physical dataset, or (None, table_name) + sql for a virtual one.
 PHYSICAL_DATASETS = [
     ("main_silver", "dim_fx_rate"),
+    # Added once real COGS/debt-facility data existed (Phase 5's 12-entity/12-month demo data)
+    # -- held back at first build since a permanently-0%/empty chart would have been misleading.
+    ("main_gold", "rpt_gross_margin"),
+    ("main_gold", "rpt_covenant_headroom"),
 ]
 
 VIRTUAL_DATASETS = {
@@ -92,6 +96,7 @@ GROUP BY 1, 2, 3, 5
 
 # entity_id-bearing datasets that need the same per-entity RLS as the Phase 3 base datasets.
 ENTITY_SCOPED_VIRTUAL_DATASETS = ["vw_working_capital", "vw_daily_cash_movement", "vw_daily_revenue"]
+ENTITY_SCOPED_PHYSICAL_DATASETS = ["rpt_gross_margin", "rpt_covenant_headroom"]
 
 RLS_CLAUSE_PER_ENTITY = (
     "entity_id in (select entity_id from main_silver.user_entity_access "
@@ -182,7 +187,10 @@ def main():
             grant_dataset_access(sm, session, controller_role, ds)
 
         print("Creating RLS filters for entity-scoped datasets...")
-        entity_scoped = [new_datasets[t] for t in ENTITY_SCOPED_VIRTUAL_DATASETS]
+        entity_scoped = [
+            new_datasets[t]
+            for t in ENTITY_SCOPED_VIRTUAL_DATASETS + ENTITY_SCOPED_PHYSICAL_DATASETS
+        ]
         get_or_create_rls_filter(
             session,
             RowLevelSecurityFilter,
