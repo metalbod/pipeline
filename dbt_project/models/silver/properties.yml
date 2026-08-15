@@ -29,7 +29,7 @@ models:
   - name: coa_mapping
     description: >
       Effective-dated entity-to-group-standard COA mapping (Silver). Unmapped local accounts
-      must fail loudly (see tests/assert_no_unmapped_accounts.sql), never be silently dropped
+      must fail loudly (see tests/assert_no_dropped_journal_lines.sql), never be silently dropped
       (ARCHITECTURE.md §6.1).
     data_tests:
       - dbt_utils.unique_combination_of_columns:
@@ -72,11 +72,33 @@ models:
         data_tests:
           - not_null
 
+  - name: dim_fx_rate
+    description: >
+      Governed FX rate table (Silver) -- period-end and period-average rates to the group
+      reporting currency (MYR), per ARCHITECTURE.md §6.3. SGD rates are clearly-labeled
+      placeholders pending a real Finance-provided rate; swap the seed value, no code changes.
+    columns:
+      - name: currency_code
+        data_tests:
+          - not_null
+      - name: rate_to_group_currency
+        data_tests:
+          - not_null
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - currency_code
+              - fiscal_year
+              - fiscal_period
+              - rate_type
+
   - name: fct_journal_line
     description: >
       Atomic, auditable fact grain (ARCHITECTURE.md §6.2) -- every consolidated number traces
-      back to a SUM() over rows here. group_currency_amount/fx_rate_used/is_intercompany/
-      counterparty_entity_id are Phase 2 columns, left null/false for now.
+      back to a SUM() over rows here. group_currency_amount/fx_rate_used are FX-translated via
+      dim_fx_rate (current-rate method); is_intercompany/counterparty_entity_id come from
+      intercompany_accounts.
     columns:
       - name: journal_line_key
         data_tests:
@@ -91,3 +113,35 @@ models:
       - name: period_key
         data_tests:
           - not_null
+      - name: group_currency_amount
+        data_tests:
+          - not_null
+      - name: fx_rate_used
+        data_tests:
+          - not_null
+
+  - name: intercompany_accounts
+    description: >
+      Governed designation of which local accounts represent intercompany balances, and with
+      which counterparty entity (ARCHITECTURE.md §6.2's counterparty_entity_id). Human-approved,
+      same governance pattern as coa_mapping.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - entity_id
+              - local_account_code
+              - effective_from
+
+  - name: elimination_rules
+    description: >
+      Governed gate on which (entity_id, counterparty_entity_id) pairs are approved for
+      intercompany elimination (ARCHITECTURE.md §6.3 step 3). An intercompany balance with no
+      matching rule here is not eliminated -- see fact_intercompany_elimination.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - entity_id
+              - counterparty_entity_id
+              - effective_from

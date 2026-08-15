@@ -57,6 +57,15 @@
       "TaxType": "NONE",
       "Class": "EXPENSE",
       "Status": "ACTIVE"
+    },
+    {
+      "AccountID": "a1111111-0000-0000-0000-000000000007",
+      "Code": "1900",
+      "Name": "Intercompany Receivable - SG-SUB",
+      "Type": "CURRENT",
+      "TaxType": "NONE",
+      "Class": "ASSET",
+      "Status": "ACTIVE"
     }
   ]
 }

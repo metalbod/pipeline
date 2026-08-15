@@ -25,7 +25,7 @@ def test_fetch_accounts():
     )
     with _client() as client:
         accounts = connector.fetch_accounts(client)
-    assert len(accounts) == 6
+    assert len(accounts) == 7
     assert accounts[0]["Code"] == "090"
 
 
@@ -36,8 +36,8 @@ def test_fetch_all_journals_stops_on_short_page():
     )
     with _client() as client:
         journals = connector.fetch_all_journals(client)
-    assert len(journals) == 3
-    assert journals[-1]["JournalNumber"] == 3
+    assert len(journals) == 4
+    assert journals[-1]["JournalNumber"] == 4
 
 
 @respx.mock
@@ -65,7 +65,7 @@ def test_fetch_all_journals_pages_until_short_page():
 def test_normalize_accounts_shape():
     raw = _load_fixture("accounts.json")["Accounts"]
     table = normalize.normalize_accounts(raw, "MY-PARENT", "batch-1")
-    assert table.num_rows == 6
+    assert table.num_rows == 7
     assert table.schema.names == [f.name for f in normalize.ACCOUNTS_SCHEMA]
     row = table.to_pylist()[0]
     assert row["entity_id"] == "MY-PARENT"
@@ -78,8 +78,8 @@ def test_normalize_journals_debit_credit_split_and_balances():
     table = normalize.normalize_journals(raw, "MY-PARENT", "batch-1")
     rows = table.to_pylist()
 
-    # 3 journals x 2 lines each
-    assert len(rows) == 6
+    # 4 journals x 2 lines each
+    assert len(rows) == 8
 
     # Debits and credits are split from Xero's signed NetAmount correctly.
     j1_lines = [r for r in rows if r["journal_id"] == "j1111111-0000-0000-0000-000000000001"]

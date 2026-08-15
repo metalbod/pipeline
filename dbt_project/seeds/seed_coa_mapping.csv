@@ -9,3 +9,6 @@ SG-SUB,610,Accounts Receivable,GS-1100,2026-08-14,,true,Kenneth Yong,2026-08-14T
 SG-SUB,200,Sales,GS-4000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
 SG-SUB,400,Office Expenses,GS-5000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
 SG-SUB,800,Accounts Payable,GS-2000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+MY-PARENT,1900,Intercompany Receivable - SG-SUB,GS-1900,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+SG-SUB,1000,Bank Account,GS-1000,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00
+SG-SUB,1900,Intercompany Payable - MY-PARENT,GS-2900,2026-08-14,,true,Kenneth Yong,2026-08-14T00:00:00

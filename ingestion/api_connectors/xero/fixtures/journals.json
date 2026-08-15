@@ -102,6 +102,39 @@
           "TaxAmount": 0.00
         }
       ]
+    },
+    {
+      "JournalID": "j1111111-0000-0000-0000-000000000004",
+      "JournalDate": "2026-07-15T00:00:00",
+      "JournalNumber": 4,
+      "CreatedDateUTC": "2026-07-15T10:00:00",
+      "Reference": "LOAN-4001",
+      "SourceID": "s1111111-0000-0000-0000-000000000004",
+      "SourceType": "MANJOURNAL",
+      "JournalLines": [
+        {
+          "JournalLineID": "l1111111-0000-0000-0000-000000000007",
+          "AccountID": "a1111111-0000-0000-0000-000000000007",
+          "AccountCode": "1900",
+          "AccountName": "Intercompany Receivable - SG-SUB",
+          "AccountType": "CURRENT",
+          "Description": "Intercompany loan disbursed to SG-SUB",
+          "NetAmount": 3300.00,
+          "GrossAmount": 3300.00,
+          "TaxAmount": 0.00
+        },
+        {
+          "JournalLineID": "l1111111-0000-0000-0000-000000000008",
+          "AccountID": "a1111111-0000-0000-0000-000000000001",
+          "AccountCode": "090",
+          "AccountName": "Business Bank Account",
+          "AccountType": "BANK",
+          "Description": "Intercompany loan disbursed to SG-SUB",
+          "NetAmount": -3300.00,
+          "GrossAmount": -3300.00,
+          "TaxAmount": 0.00
+        }
+      ]
     }
   ]
 }

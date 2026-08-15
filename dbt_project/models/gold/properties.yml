@@ -5,6 +5,8 @@ models:
     description: >
       Derived entity/account/period balance summary (Gold) -- ARCHITECTURE.md §6.2. Computed
       for every account_type uniformly so the balance-sheet-equation test can use it directly.
+      Grain includes counterparty_entity_id (null except for intercompany accounts) so
+      fact_intercompany_elimination can select straight off this model.
     columns:
       - name: entity_id
         data_tests:
@@ -18,6 +20,25 @@ models:
       - name: closing_balance
         data_tests:
           - not_null
+      - name: group_currency_amount
+        data_tests:
+          - not_null
+
+  - name: fact_intercompany_elimination
+    description: >
+      Explicit intercompany elimination detail (ARCHITECTURE.md §6.2) -- what was eliminated and
+      why, not netted away silently. Gated by elimination_rules (Silver); see
+      tests/assert_intercompany_eliminations_net_to_zero.sql for the correctness check.
+    columns:
+      - name: entity_id
+        data_tests:
+          - not_null
+      - name: counterparty_entity_id
+        data_tests:
+          - not_null
+      - name: eliminated_amount
+        data_tests:
+          - not_null
 
   - name: rpt_balance_sheet
     description: >
@@ -27,3 +48,30 @@ models:
 
   - name: rpt_profit_and_loss
     description: Unconsolidated P&L per entity/period -- period_movement, not a cumulative balance.
+
+  - name: fct_balance_consolidated
+    description: >
+      Group-level consolidated balances (ARCHITECTURE.md §6.3 steps 2-3) -- aggregated across
+      entities, minus intercompany eliminations. Full consolidation method (100% of every
+      entity's balance, regardless of ownership_pct). Exposes both consolidated_balance
+      (cumulative, for balance-sheet accounts) and consolidated_period_movement (for P&L
+      accounts).
+    columns:
+      - name: group_standard_code
+        data_tests:
+          - not_null
+      - name: period_key
+        data_tests:
+          - not_null
+      - name: consolidated_balance
+        data_tests:
+          - not_null
+
+  - name: rpt_balance_sheet_consolidated
+    description: >
+      Consolidated balance sheet, group level. Equity is a two-line split -- "Equity Attributable
+      to Parent" and "Non-Controlling Interest" -- computed from each subsidiary's ownership_pct;
+      see the model's header comment for why it isn't itemized per equity account.
+
+  - name: rpt_profit_and_loss_consolidated
+    description: Consolidated P&L, group level -- consolidated_period_movement, not a cumulative balance.

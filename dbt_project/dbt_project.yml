@@ -67,3 +67,30 @@ seeds:
         is_active: BOOLEAN
         approved_by: VARCHAR
         approved_at: TIMESTAMP
+    seed_dim_fx_rate:
+      +column_types:
+        currency_code: VARCHAR
+        fiscal_year: INTEGER
+        fiscal_period: INTEGER
+        rate_type: VARCHAR
+        rate_to_group_currency: DECIMAL(18, 6)
+        source: VARCHAR
+        approved_by: VARCHAR
+        approved_at: TIMESTAMP
+    seed_intercompany_accounts:
+      +column_types:
+        entity_id: VARCHAR
+        local_account_code: VARCHAR
+        counterparty_entity_id: VARCHAR
+        effective_from: DATE
+        effective_to: DATE
+        approved_by: VARCHAR
+        approved_at: TIMESTAMP
+    seed_elimination_rules:
+      +column_types:
+        entity_id: VARCHAR
+        counterparty_entity_id: VARCHAR
+        effective_from: DATE
+        effective_to: DATE
+        approved_by: VARCHAR
+        approved_at: TIMESTAMP

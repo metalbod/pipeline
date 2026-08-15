@@ -1,8 +1,8 @@
-"""Phase 1 dashboard: unconsolidated balance sheet + P&L per entity.
+"""Phase 2 dashboard: per-entity and consolidated balance sheet + P&L.
 
 Queries Gold directly (ARCHITECTURE.md §3: "no ad hoc SQL against Silver from the BI layer").
-No FX translation or consolidation yet -- each entity is shown in its own functional currency
-(Phase 2 adds group-currency translation and the consolidated view).
+Per-entity views show each entity in its own functional currency; the consolidated view shows
+the group reporting currency (MYR) after FX translation and intercompany elimination.
 """
 
 import os
@@ -14,6 +14,8 @@ import streamlit as st
 st.set_page_config(page_title="Finance Platform", layout="wide")
 
 DUCKDB_PATH = os.environ.get("DUCKDB_PATH", "./storage/warehouse.duckdb")
+CONSOLIDATED = "__CONSOLIDATED__"
+GROUP_CURRENCY = "MYR"
 
 
 @st.cache_resource
@@ -25,10 +27,11 @@ def load_df(query: str, params: list | None = None) -> pl.DataFrame:
     return get_connection().execute(query, params or []).pl()
 
 
-st.title("Finance Platform — Phase 1")
+st.title("Finance Platform — Phase 2")
 st.caption(
-    "Unconsolidated, per-entity balance sheet and P&L. Each entity reports in its own "
-    "functional currency — no FX translation or consolidation yet (Phase 2)."
+    "Per-entity statements are shown in each entity's own functional currency. The consolidated "
+    "view aggregates both entities into the group reporting currency, with intercompany balances "
+    "eliminated."
 )
 
 entities = load_df(
@@ -38,20 +41,31 @@ if entities.is_empty():
     st.warning("No entities found in dim_entity — has `dbt build` been run?")
     st.stop()
 
-entity_options = {
-    f"{r['entity_id']} — {r['entity_name']}": r["entity_id"] for r in entities.iter_rows(named=True)
-}
+entity_options = {"Group (Consolidated)": CONSOLIDATED}
+entity_options.update(
+    {f"{r['entity_id']} — {r['entity_name']}": r["entity_id"] for r in entities.iter_rows(named=True)}
+)
 entity_label = st.sidebar.selectbox("Entity", options=list(entity_options.keys()))
 entity_id = entity_options[entity_label]
-currency = entities.filter(pl.col("entity_id") == entity_id)["functional_currency"][0]
+is_consolidated = entity_id == CONSOLIDATED
+currency = (
+    GROUP_CURRENCY
+    if is_consolidated
+    else entities.filter(pl.col("entity_id") == entity_id)["functional_currency"][0]
+)
+
+bs_table = "main_gold.rpt_balance_sheet_consolidated" if is_consolidated else "main_gold.rpt_balance_sheet"
+pnl_table = "main_gold.rpt_profit_and_loss_consolidated" if is_consolidated else "main_gold.rpt_profit_and_loss"
+entity_filter = "" if is_consolidated else "where entity_id = ?"
+entity_params = [] if is_consolidated else [entity_id]
 
 periods = load_df(
-    "select distinct fiscal_year, fiscal_period, period_start from main_gold.rpt_balance_sheet "
-    "where entity_id = ? order by period_start desc",
-    [entity_id],
+    f"select distinct fiscal_year, fiscal_period, period_start from {bs_table} "
+    f"{entity_filter} order by period_start desc",
+    entity_params,
 )
 if periods.is_empty():
-    st.info(f"No Gold data yet for {entity_id}. Ingest and `dbt build` first.")
+    st.info(f"No Gold data yet for {entity_label}. Ingest and `dbt build` first.")
     st.stop()
 
 period_options = {
@@ -61,15 +75,20 @@ period_options = {
 period_label = st.sidebar.selectbox("Period", options=list(period_options.keys()))
 fiscal_year, fiscal_period = period_options[period_label]
 
+period_filter = "fiscal_year = ? and fiscal_period = ?"
+period_params = [fiscal_year, fiscal_period]
+bs_where = " and ".join(f for f in [entity_filter.replace("where ", ""), period_filter] if f)
+pnl_where = bs_where
+
 bs = load_df(
-    "select account_name, account_type, amount from main_gold.rpt_balance_sheet "
-    "where entity_id = ? and fiscal_year = ? and fiscal_period = ? order by account_type, account_name",
-    [entity_id, fiscal_year, fiscal_period],
+    f"select account_name, account_type, amount from {bs_table} "
+    f"where {bs_where} order by account_type, account_name",
+    entity_params + period_params,
 )
 pnl = load_df(
-    "select account_name, account_type, amount from main_gold.rpt_profit_and_loss "
-    "where entity_id = ? and fiscal_year = ? and fiscal_period = ? order by account_type, account_name",
-    [entity_id, fiscal_year, fiscal_period],
+    f"select account_name, account_type, amount from {pnl_table} "
+    f"where {pnl_where} order by account_type, account_name",
+    entity_params + period_params,
 )
 
 col1, col2 = st.columns(2)

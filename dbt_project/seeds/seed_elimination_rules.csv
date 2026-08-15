@@ -1,0 +1,3 @@
+entity_id,counterparty_entity_id,effective_from,effective_to,approved_by,approved_at
+MY-PARENT,SG-SUB,2026-08-14,,Kenneth Yong,2026-08-14T00:00:00
+SG-SUB,MY-PARENT,2026-08-14,,Kenneth Yong,2026-08-14T00:00:00

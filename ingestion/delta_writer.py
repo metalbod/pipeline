@@ -10,13 +10,20 @@ audit trail -- see the raw-dump helpers below for the separate as-received archi
 
 import json
 import os
+import random
+import time
 import uuid
 from datetime import datetime, timezone
 
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
+from deltalake.exceptions import DeltaError
+from filelock import FileLock
 
 from ingestion.object_store import bronze_api_path, bronze_delta_table_path, bronze_file_path
+
+MAX_COMMIT_RETRIES = 5
+LOCK_TIMEOUT_SECONDS = 30
 
 
 def new_batch_id() -> str:
@@ -24,10 +31,33 @@ def new_batch_id() -> str:
 
 
 def write_bronze(domain: str, table: pa.Table, mode: str = "append") -> str:
-    """Append `table` to the Bronze Delta table for `domain`. Returns the table path."""
+    """Append `table` to the Bronze Delta table for `domain`. Returns the table path.
+
+    Multiple ingestion sources can land near-simultaneously in practice (several file uploads
+    processed at once, a scheduled API pull overlapping a sensor-triggered run) -- concurrent
+    writers to the *same* domain's Delta table is a real, expected scenario, not an edge case.
+    Delta Lake's own optimistic concurrency handles two processes racing at the storage-commit
+    level, but under heavier simultaneous contention that surfaced as a hard crash of the
+    writing process rather than a catchable conflict exception in testing -- not something a
+    Python-level retry can recover from once the process is gone. A cross-process file lock
+    scoped per domain (not global -- writes to different domains, e.g. journal_lines vs.
+    accounts, still proceed in parallel) removes the race by construction instead of hoping
+    retries paper over it. The retry loop stays as defense-in-depth for the ordinary,
+    catchable DeltaError case.
+    """
     path = bronze_delta_table_path(domain)
     os.makedirs(path, exist_ok=True)
-    write_deltalake(path, table, mode=mode)
+    lock_path = path.rstrip("/\\") + ".lock"
+
+    with FileLock(lock_path, timeout=LOCK_TIMEOUT_SECONDS):
+        for attempt in range(MAX_COMMIT_RETRIES):
+            try:
+                write_deltalake(path, table, mode=mode)
+                return path
+            except DeltaError:
+                if attempt == MAX_COMMIT_RETRIES - 1:
+                    raise
+                time.sleep(0.2 * (2**attempt) + random.uniform(0, 0.1))
     return path
 
 

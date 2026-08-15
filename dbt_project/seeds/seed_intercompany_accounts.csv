@@ -1,0 +1,3 @@
+entity_id,local_account_code,counterparty_entity_id,effective_from,effective_to,approved_by,approved_at
+MY-PARENT,1900,SG-SUB,2026-08-14,,Kenneth Yong,2026-08-14T00:00:00
+SG-SUB,1900,MY-PARENT,2026-08-14,,Kenneth Yong,2026-08-14T00:00:00
