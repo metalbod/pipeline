@@ -31,4 +31,4 @@ dependencies = [
 module_name = "dagster_project.definitions"
 
 [tool.setuptools.packages.find]
-include = ["dagster_project*", "ingestion*", "data_quality*"]
+include = ["dagster_project*", "ingestion*", "data_quality*", "tools*"]

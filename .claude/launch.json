@@ -6,6 +6,19 @@
       "runtimeExecutable": ".venv/bin/streamlit",
       "runtimeArgs": ["run", "dashboards/streamlit_app/app.py", "--server.headless", "true"],
       "port": 8501
+    },
+    {
+      "name": "coa-mapping-review",
+      "runtimeExecutable": ".venv/bin/streamlit",
+      "runtimeArgs": [
+        "run",
+        "tools/coa_mapping_review/app.py",
+        "--server.headless",
+        "true",
+        "--server.port",
+        "8502"
+      ],
+      "port": 8502
     }
   ]
 }

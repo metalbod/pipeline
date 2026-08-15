@@ -25,6 +25,9 @@ storage/landing/*
 storage/*.duckdb
 storage/*.duckdb.wal
 
+# tools/coa_mapping_review's write lock on seed_coa_mapping.csv
+dbt_project/seeds/*.lock
+
 # Secrets / local env
 .env
 .env.*.local
