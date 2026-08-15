@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFO Financial Health Dashboard</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-1:      #fcfcfb;
+  --page-plane:      #f9f9f7;
+  --text-primary:   #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted:     #898781;
+  --gridline:       #e1e0d9;
+  --baseline:       #c3c2b7;
+  --border:         rgba(11,11,11,0.10);
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+  --series-5: #e87ba4; --series-6: #008300; --series-7: #4a3aa7; --series-8: #e34948;
+  --status-good: #0ca30c; --status-warning: #fab219; --status-serious: #ec835a; --status-critical: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page-plane:      #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+    --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
+    --status-good: #0ca30c; --status-warning: #fab219; --status-serious: #ec835a; --status-critical: #d03b3b;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--page-plane); color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px; line-height: 1.45;
+}
+header {
+  padding: 20px 28px; background: var(--surface-1); border-bottom: 1px solid var(--border);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  position: sticky; top: 0; z-index: 10;
+}
+header h1 { font-size: 19px; margin: 0 0 2px; }
+.freshness { color: var(--text-muted); font-size: 12.5px; }
+.view-picker { display: flex; align-items: center; gap: 8px; }
+.view-picker label { font-size: 12.5px; color: var(--text-secondary); }
+.view-picker select {
+  font: inherit; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-1); color: var(--text-primary);
+}
+main { padding: 24px 28px 60px; max-width: 1400px; margin: 0 auto; }
+.dash-section { margin-bottom: 34px; }
+.dash-section h2 { font-size: 16px; margin: 0 0 4px; }
+.section-intro { color: var(--text-secondary); font-size: 13px; margin: 0 0 14px; max-width: 70ch; }
+.metric-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px;
+}
+.metric-card {
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; display: flex; flex-direction: column; min-width: 0;
+}
+.metric-card h3 { font-size: 14px; margin: 0 0 4px; }
+.metric-def { color: var(--text-secondary); font-size: 12.5px; margin: 0 0 12px; }
+.metric-note { color: var(--text-muted); font-size: 11.5px; font-style: italic; margin: 10px 0 0; }
+.metric-body { flex: 1; min-height: 40px; }
+.chart-svg { width: 100%; height: auto; overflow: visible; }
+.axis-label { fill: var(--text-muted); font-size: 9.5px; }
+.baseline { stroke: var(--baseline); stroke-width: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 8px; }
+.legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-secondary); }
+.swatch { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.stat-tile { padding: 10px 0; }
+.stat-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
+.stat-value { font-size: 22px; font-weight: 600; }
+.stat-note { font-size: 10.5px; color: var(--text-muted); margin-top: 2px; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td {
+  text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--gridline);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+th { color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.02em; }
+.placeholder {
+  display: flex; gap: 10px; align-items: flex-start; color: var(--text-muted);
+  font-size: 12.5px; background: var(--page-plane); border-radius: 8px; padding: 12px; border: 1px dashed var(--border);
+}
+.placeholder-icon { font-size: 16px; line-height: 1; }
+.error-card {
+  color: var(--status-critical); font-size: 12.5px; background: var(--page-plane);
+  border-radius: 8px; padding: 12px; border: 1px solid var(--border);
+}
+.badge {
+  display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px;
+  margin-left: 6px; vertical-align: middle;
+}
+.badge-critical { background: var(--status-critical); color: #fff; }
+footer { padding: 20px 28px 40px; color: var(--text-muted); font-size: 11.5px; max-width: 1400px; margin: 0 auto; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>CFO Financial Health Dashboard</h1>
+    <div class="freshness" id="freshness-note"></div>
+  </div>
+  <div class="view-picker">
+    <label for="view-select">Viewing as</label>
+    <select id="view-select"></select>
+  </div>
+</header>
+<main id="dashboard-main"></main>
+<footer>
+  Generated by <code>dashboards/claude_html/generate.py</code> from
+  <code>dashboards/claude_html/config/dashboard.md</code>. The role switcher above changes what's
+  displayed, not what this file contains &mdash; every entity's data is embedded in this page
+  regardless of the selected view. Re-run the generator after <code>dbt build</code> to refresh.
+</footer>
+<script id="dashboard-data" type="application/json">{"generated_at": "2026-08-15T17:34:23.412470", "data_as_of": "2026-08-04", "views": [{"id": "holdings", "label": "Holdings \u2014 Group Finance Owner (all companies)", "allow_all": true, "allowed": []}, {"id": "controller-sg-sub", "label": "Regional Controller \u2014 Singapore Subsidiary", "allow_all": false, "allowed": ["SG-SUB"]}], "default_view": "holdings", "sections": [{"title": "1. Cash & Liquidity Position (The Most Critical)", "intro": "A CFO's primary rule is to ensure the organization never runs out of money.", "metrics": [{"title": "Net Cash Balance", "status": "live", "format": "currency", "chart": "bar", "definition": "Consolidated cash balance (GS-1000, Cash and Bank) by entity, plus the group-consolidated total.", "note": "\"Consolidated\" here means summed across subsidiaries in the Gold layer, not real-time \u2014 it reflects the most recent closed batch load, not a live bank feed. There's no per-bank-account dimension in the schema yet, only the GL cash balance.", "x_field": null, "series_field": null, "label_field": null, "sql": "select entity_id, entity_name, fiscal_year, fiscal_period, period_end, amount as value,\n       functional_currency as currency\nfrom main_gold.rpt_balance_sheet\nwhere group_standard_code = 'GS-1000'\n\nunion all\n\nselect 'GROUP' as entity_id, 'Group Consolidated' as entity_name,\n       fiscal_year, fiscal_period, period_end, amount as value,\n       'MYR' as currency\nfrom main_gold.rpt_balance_sheet_consolidated\nwhere group_standard_code = 'GS-1000'\n\norder by entity_id, fiscal_year, fiscal_period", "columns": ["entity_id", "entity_name", "fiscal_year", "fiscal_period", "period_end", "value", "currency"], "rows": [{"entity_id": "GROUP", "entity_name": "Group Consolidated", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "value": 1000.0, "currency": "MYR"}, {"entity_id": "MY-PARENT", "entity_name": "Malaysia Parent Co", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "value": -2300.0, "currency": "MYR"}, {"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "value": 1000.0, "currency": "SGD"}], "row_count": 3, "error": null}, {"title": "Daily Cash Burn Rate / Run Rate", "status": "live", "format": "currency", "chart": "bar", "definition": "Net movement in cash & equivalents (GS-1000) per day, by entity \u2014 debits (cash in) minus credits (cash out).", "note": "Batch-cadence data, not a live feed \u2014 see the format note above. Days without a posted journal line simply don't appear rather than showing as zero.", "x_field": "posted_at", "series_field": "entity_name", "label_field": null, "sql": "select\n    j.entity_id,\n    e.entity_name,\n    j.posted_at,\n    sum(j.debit_amount - j.credit_amount) as value,\n    e.functional_currency as currency\nfrom main_silver.fct_journal_line j\njoin main_silver.dim_account_group_standard a on a.account_key = j.account_key\njoin main_silver.dim_entity e on e.entity_id = j.entity_id\nwhere a.group_standard_code = 'GS-1000'\ngroup by 1, 2, 3, 5\norder by 1, 3", "columns": ["entity_id", "entity_name", "posted_at", "value", "currency"], "rows": [{"entity_id": "MY-PARENT", "entity_name": "Malaysia Parent Co", "posted_at": "2026-07-15", "value": -3300.0, "currency": "MYR"}, {"entity_id": "MY-PARENT", "entity_name": "Malaysia Parent Co", "posted_at": "2026-07-20", "value": 1000.0, "currency": "MYR"}, {"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "posted_at": "2026-07-15", "value": 1000.0, "currency": "SGD"}], "row_count": 3, "error": null}, {"title": "Available Liquidity", "status": "placeholder-no-source", "format": "currency", "chart": "none", "definition": "Total liquidity capacity \u2014 cash-on-hand plus instantly accessible credit lines or revolving facilities.", "note": "Nothing in the pipeline ingests credit facility limits or drawn/undrawn amounts \u2014 `debt_covenants` only tracks covenant thresholds, not facility size. Needs a new Silver source (e.g. a facility ledger) before this can be built.", "x_field": null, "series_field": null, "label_field": null, "sql": null, "columns": [], "rows": [], "row_count": 0, "error": null}]}, {"title": "2. Working Capital Status", "intro": "Tracks how efficiently the company's short-term assets and liabilities are circulating.", "metrics": [{"title": "Days Sales Outstanding (DSO)", "status": "live", "format": "days", "chart": "bar", "definition": "Average days to collect receivables \u2014 a rapid view of collections efficiency; a sudden spike indicates potential customer defaults or credit-policy issues.", "note": "`dso_days_true` (invoice-weighted, from AR aging) is null until enough aging history accumulates \u2014 the chart falls back to `dso_days_approx` (balance-based) in the meantime and labels which one it's showing.", "x_field": null, "series_field": null, "label_field": null, "sql": "select entity_id, entity_name, fiscal_year, fiscal_period, period_end,\n       dso_days_approx, dso_days_true,\n       coalesce(dso_days_true, dso_days_approx) as value\nfrom main_gold.rpt_dso_dpo\norder by entity_id, fiscal_year, fiscal_period", "columns": ["entity_id", "entity_name", "fiscal_year", "fiscal_period", "period_end", "dso_days_approx", "dso_days_true", "value"], "rows": [{"entity_id": "MY-PARENT", "entity_name": "Malaysia Parent Co", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "dso_days_approx": 0.0, "dso_days_true": null, "value": 0.0}, {"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "dso_days_approx": 31.0, "dso_days_true": null, "value": 31.0}], "row_count": 2, "error": null}, {"title": "Days Payable Outstanding (DPO)", "status": "live", "format": "days", "chart": "bar", "definition": "Average days to pay suppliers \u2014 monitors whether payment terms are being optimized without straining vendor relationships.", "note": "Same approx/true fallback as DSO above.", "x_field": null, "series_field": null, "label_field": null, "sql": "select entity_id, entity_name, fiscal_year, fiscal_period, period_end,\n       dpo_days_approx, dpo_days_true,\n       coalesce(dpo_days_true, dpo_days_approx) as value\nfrom main_gold.rpt_dso_dpo\norder by entity_id, fiscal_year, fiscal_period", "columns": ["entity_id", "entity_name", "fiscal_year", "fiscal_period", "period_end", "dpo_days_approx", "dpo_days_true", "value"], "rows": [{"entity_id": "MY-PARENT", "entity_name": "Malaysia Parent Co", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "dpo_days_approx": 31.0, "dpo_days_true": null, "value": 31.0}, {"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "dpo_days_approx": 31.0, "dpo_days_true": null, "value": 31.0}], "row_count": 2, "error": null}, {"title": "Top Overdue Receivables", "status": "live", "format": "table", "chart": "table", "definition": "Open AR invoices past due, ranked by amount outstanding \u2014 a high-level watchlist of large corporate accounts that are past due.", "note": "", "x_field": null, "series_field": null, "label_field": null, "sql": "select entity_id, invoice_id, contact_name, invoice_date, due_date,\n       days_overdue, aging_bucket, amount_outstanding, currency, overdue_rank\nfrom main_gold.rpt_top_overdue_receivables\norder by entity_id, overdue_rank", "columns": ["entity_id", "invoice_id", "contact_name", "invoice_date", "due_date", "days_overdue", "aging_bucket", "amount_outstanding", "currency", "overdue_rank"], "rows": [{"entity_id": "MY-PARENT", "invoice_id": "inv-uuid-1002", "contact_name": "Beta Industries Sdn Bhd", "invoice_date": "2026-07-10", "due_date": "2026-07-31", "days_overdue": 15, "aging_bucket": "1-30 days", "amount_outstanding": 800.0, "currency": null, "overdue_rank": 1}, {"entity_id": "SG-SUB", "invoice_id": "INV-2001", "contact_name": "Example Pte Ltd", "invoice_date": "2026-07-05", "due_date": "2026-08-04", "days_overdue": 11, "aging_bucket": "1-30 days", "amount_outstanding": 1500.0, "currency": "SGD", "overdue_rank": 1}], "row_count": 2, "error": null}]}, {"title": "3. Revenue & Forward-Looking Pipeline", "intro": "While backward-looking figures are managed monthly, forward-looking metrics flag\ntop-line issues early.", "metrics": [{"title": "Daily / Week-to-Date Revenue", "status": "live", "format": "currency", "chart": "bar", "definition": "Revenue (GS-4000 and other REVENUE-type accounts) recognized per day, by entity.", "note": "Shown as a trend only, not \"contrasted against the month's target\" as originally scoped \u2014 `rpt_budget_variance` is monthly-grain, so a day/week-to-date-vs-prorated-target comparison would require inventing a proration assumption nothing else in the codebase makes. See Major Budget Variances below for the real (monthly) budget comparison.", "x_field": "posted_at", "series_field": "entity_name", "label_field": null, "sql": "select\n    j.entity_id,\n    e.entity_name,\n    j.posted_at,\n    sum(j.credit_amount - j.debit_amount) as value,\n    e.functional_currency as currency\nfrom main_silver.fct_journal_line j\njoin main_silver.dim_account_group_standard a on a.account_key = j.account_key\njoin main_silver.dim_entity e on e.entity_id = j.entity_id\nwhere a.account_type = 'REVENUE'\ngroup by 1, 2, 3, 5\norder by 1, 3", "columns": ["entity_id", "entity_name", "posted_at", "value", "currency"], "rows": [{"entity_id": "MY-PARENT", "entity_name": "Malaysia Parent Co", "posted_at": "2026-07-05", "value": 1000.0, "currency": "MYR"}, {"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "posted_at": "2026-07-05", "value": 1500.0, "currency": "SGD"}], "row_count": 2, "error": null}, {"title": "Sales Pipeline Velocity", "status": "live", "format": "currency", "chart": "bar", "definition": "Total contract value (TCV) and deal count by pipeline stage, per entity, with the period-over-period TCV change so a slowdown is visible directly.", "note": "Finance-entered pipeline estimate (monthly file upload), not live CRM data.", "x_field": "pipeline_stage", "series_field": "entity_name", "label_field": null, "sql": "select entity_id, entity_name, fiscal_year, fiscal_period, period_end,\n       pipeline_stage, deal_count, total_contract_value as value, currency,\n       tcv_change_from_prior_period\nfrom main_gold.rpt_sales_pipeline_velocity\norder by entity_id, period_start, pipeline_stage", "columns": ["entity_id", "entity_name", "fiscal_year", "fiscal_period", "period_end", "pipeline_stage", "deal_count", "value", "currency", "tcv_change_from_prior_period"], "rows": [{"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "pipeline_stage": "ClosedWon", "deal_count": 1, "value": 4500.0, "currency": "SGD", "tcv_change_from_prior_period": null}, {"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "pipeline_stage": "Proposal", "deal_count": 2, "value": 12000.0, "currency": "SGD", "tcv_change_from_prior_period": null}, {"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "pipeline_stage": "Prospecting", "deal_count": 5, "value": 25000.0, "currency": "SGD", "tcv_change_from_prior_period": null}, {"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "pipeline_stage": "Qualification", "deal_count": 3, "value": 18000.0, "currency": "SGD", "tcv_change_from_prior_period": null}], "row_count": 4, "error": null}]}, {"title": "4. Operational Efficiencies & Budget Variances", "intro": "CFOs want to see macro deviations from expected parameters without digging into\nsub-ledgers.", "metrics": [{"title": "Gross Margin % Trends", "status": "placeholder-empty", "format": "percent", "chart": "none", "definition": "(Revenue \u2212 COGS) / Revenue, by entity and period \u2014 catches supply-chain price increases or competitive pricing pressure early.", "note": "The model runs but reads a flat 100% margin today because nothing has ever posted to the COGS account (GS-5100) in either source system \u2014 that's an absence of input data, not a bug. Showing 100% as a real number would be actively misleading, so this renders as a placeholder until Finance posts real COGS entries.", "x_field": null, "series_field": null, "label_field": null, "sql": "select entity_id, entity_name, fiscal_year, fiscal_period, period_end,\n       revenue, cogs, gross_margin_pct as value\nfrom main_gold.rpt_gross_margin\norder by entity_id, fiscal_year, fiscal_period", "columns": ["entity_id", "entity_name", "fiscal_year", "fiscal_period", "period_end", "revenue", "cogs", "value"], "rows": [{"entity_id": "MY-PARENT", "entity_name": "Malaysia Parent Co", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "revenue": 1000.0, "cogs": 0.0, "value": 100.0}, {"entity_id": "SG-SUB", "entity_name": "Singapore Subsidiary", "fiscal_year": 2026, "fiscal_period": 7, "period_end": "2026-07-31", "revenue": 1500.0, "cogs": 0.0, "value": 100.0}], "row_count": 2, "error": null}, {"title": "Major Budget Variances", "status": "live", "format": "percent", "chart": "bar", "definition": "Budgeted vs. actual by entity/account/period; flagged as a major variance when more than 15% off budget (a first-cut threshold, not an audited policy).", "note": "", "x_field": "account_name", "series_field": "entity_name", "label_field": null, "sql": "select b.entity_id, b.period, b.group_standard_code, b.account_name, b.account_type,\n       b.budgeted_amount, b.actual_amount, b.variance_amount,\n       b.variance_pct as value, b.is_major_variance,\n       e.functional_currency as currency\nfrom main_gold.rpt_budget_variance b\njoin main_silver.dim_entity e on e.entity_id = b.entity_id\norder by b.entity_id, b.period, b.account_name", "columns": ["entity_id", "period", "group_standard_code", "account_name", "account_type", "budgeted_amount", "actual_amount", "variance_amount", "value", "is_major_variance", "currency"], "rows": [{"entity_id": "MY-PARENT", "period": "2026-07", "group_standard_code": "GS-5000", "account_name": "Office Expenses", "account_type": "EXPENSE", "budgeted_amount": 300.0, "actual_amount": 250.5, "variance_amount": -49.5, "value": -16.5, "is_major_variance": true, "currency": "MYR"}, {"entity_id": "MY-PARENT", "period": "2026-07", "group_standard_code": "GS-4000", "account_name": "Sales Revenue", "account_type": "REVENUE", "budgeted_amount": 1200.0, "actual_amount": 1000.0, "variance_amount": -200.0, "value": -16.7, "is_major_variance": true, "currency": "MYR"}, {"entity_id": "SG-SUB", "period": "2026-07", "group_standard_code": "GS-5000", "account_name": "Office Expenses", "account_type": "EXPENSE", "budgeted_amount": 350.0, "actual_amount": 320.75, "variance_amount": -29.25, "value": -8.4, "is_major_variance": false, "currency": "SGD"}, {"entity_id": "SG-SUB", "period": "2026-07", "group_standard_code": "GS-4000", "account_name": "Sales Revenue", "account_type": "REVENUE", "budgeted_amount": 1800.0, "actual_amount": 1500.0, "variance_amount": -300.0, "value": -16.7, "is_major_variance": true, "currency": "SGD"}], "row_count": 4, "error": null}]}, {"title": "5. Strategic Risk Watchlist", "intro": "Depending on the sector, external market triggers dictate capital safety.", "metrics": [{"title": "Macro Market Volatility \u2014 FX Exposure", "status": "live", "format": "ratio", "chart": "stat", "definition": "Current FX rate to group reporting currency (MYR) for each subsidiary's functional currency, at period-end and period-average.", "note": "Only one fiscal period (2026-07) has FX rates loaded so far, so this renders as current-rate tiles rather than a volatility trend \u2014 it becomes a real trend automatically once a second period's rates are loaded. The SGD rate is also flagged as a placeholder pending a Finance-provided rate (see `seed_dim_fx_rate.csv`).", "x_field": null, "series_field": null, "label_field": "currency_code, rate_type", "sql": "select 'GROUP' as entity_id, currency_code, fiscal_year, fiscal_period, rate_type,\n       rate_to_group_currency as value, source\nfrom main_silver.dim_fx_rate\norder by currency_code, fiscal_year, fiscal_period, rate_type", "columns": ["entity_id", "currency_code", "fiscal_year", "fiscal_period", "rate_type", "value", "source"], "rows": [{"entity_id": "GROUP", "currency_code": "MYR", "fiscal_year": 2026, "fiscal_period": 7, "rate_type": "period_average", "value": 1.0, "source": "identity (group reporting currency)"}, {"entity_id": "GROUP", "currency_code": "MYR", "fiscal_year": 2026, "fiscal_period": 7, "rate_type": "period_end", "value": 1.0, "source": "identity (group reporting currency)"}, {"entity_id": "GROUP", "currency_code": "SGD", "fiscal_year": 2026, "fiscal_period": 7, "rate_type": "period_average", "value": 3.3, "source": "placeholder -- pending Finance-provided rate"}, {"entity_id": "GROUP", "currency_code": "SGD", "fiscal_year": 2026, "fiscal_period": 7, "rate_type": "period_end", "value": 3.3, "source": "placeholder -- pending Finance-provided rate"}], "row_count": 4, "error": null}, {"title": "Macro Market Volatility \u2014 Interest Rates & Commodities", "status": "placeholder-no-source", "format": "ratio", "chart": "none", "definition": "Exposure to shifting interest rates or commodity price fluctuations affecting raw input costs.", "note": "No market-data connector exists in this platform \u2014 would need a new external data source (e.g. a rates/commodities feed), genuinely out of scope for the pipeline as built today.", "x_field": null, "series_field": null, "label_field": null, "sql": null, "columns": [], "rows": [], "row_count": 0, "error": null}, {"title": "Regulatory Capital / Covenants", "status": "placeholder-empty", "format": "percent", "chart": "none", "definition": "Actual debt-to-equity ratio vs. the covenant threshold, headroom %, and a breach flag, per debt facility.", "note": "The model runs but `debt_covenants` has zero rows \u2014 no real debt facility has been seeded yet. Renders empty until Finance provides real facility/covenant terms.", "x_field": null, "series_field": null, "label_field": null, "sql": "select entity_id, facility_name, covenant_type, threshold_value,\n       fiscal_year, fiscal_period, external_debt, total_equity,\n       actual_debt_to_equity_ratio as value, headroom_pct, is_breached\nfrom main_gold.rpt_covenant_headroom\norder by entity_id, fiscal_year, fiscal_period", "columns": ["entity_id", "facility_name", "covenant_type", "threshold_value", "fiscal_year", "fiscal_period", "external_debt", "total_equity", "value", "headroom_pct", "is_breached"], "rows": [], "row_count": 0, "error": null}]}]}</script>
+<script>
+const DASHBOARD = JSON.parse(document.getElementById('dashboard-data').textContent);
+let currentViewId = DASHBOARD.default_view;
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function truncateLabel(s, n = 12) {
+  s = String(s ?? '');
+  return s.length > n ? s.slice(0, n - 1) + '…' : s;
+}
+function prettyCol(c) {
+  return String(c).replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
+}
+function fmtValue(format, value, currency) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
+  const num = Number(value);
+  switch (format) {
+    case 'currency':
+      try {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'MYR', maximumFractionDigits: 0 }).format(num);
+      } catch (e) {
+        return (currency || '') + ' ' + num.toLocaleString(undefined, { maximumFractionDigits: 0 });
+      }
+    case 'percent': return num.toFixed(1) + '%';
+    case 'days': return num.toFixed(1) + ' days';
+    case 'ratio': return num.toFixed(4);
+    case 'count': return num.toLocaleString();
+    default: return String(value);
+  }
+}
+function formatCell(col, value) {
+  if (value === null || value === undefined) return '';
+  if (col.endsWith('_pct')) return Number(value).toFixed(1) + '%';
+  if (col === 'is_major_variance' || col === 'is_breached') return value ? 'Yes' : 'No';
+  if (typeof value === 'number') return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  return String(value);
+}
+function isRowVisible(row, view) {
+  return view.allow_all || (row.entity_id != null && view.allowed.includes(row.entity_id));
+}
+
+let ENTITY_COLOR_MAP = null;
+function buildEntityColorMap() {
+  const order = [], seen = new Set();
+  for (const section of DASHBOARD.sections) {
+    for (const metric of section.metrics) {
+      for (const row of (metric.rows || [])) {
+        const id = row.entity_id;
+        if (id && !seen.has(id)) { seen.add(id); order.push(id); }
+      }
+    }
+  }
+  const slots = [1,2,3,4,5,6,7,8].map(n => `var(--series-${n})`);
+  const map = {};
+  order.forEach((id, i) => { map[id] = slots[i % slots.length]; });
+  return map;
+}
+function getEntityColor(entityId) {
+  if (!ENTITY_COLOR_MAP) ENTITY_COLOR_MAP = buildEntityColorMap();
+  return ENTITY_COLOR_MAP[entityId] || 'var(--text-muted)';
+}
+
+function round1(n) { return Math.round(n * 10) / 10; }
+
+function barPath(x, top, w, h, r, roundTop) {
+  r = Math.max(0, Math.min(r, w / 2, h));
+  x = round1(x); top = round1(top); w = round1(w); h = round1(h);
+  const bottom = round1(top + h);
+  if (r < 0.5) return `M${x},${top} h${w} v${h} h${-w} Z`;
+  if (roundTop) {
+    return `M${x},${bottom} L${x},${round1(top + r)} Q${x},${top} ${round1(x + r)},${top} ` +
+           `L${round1(x + w - r)},${top} Q${x + w},${top} ${x + w},${round1(top + r)} L${x + w},${bottom} Z`;
+  }
+  return `M${x},${top} L${x + w},${top} L${x + w},${round1(bottom - r)} Q${x + w},${bottom} ${round1(x + w - r)},${bottom} ` +
+         `L${round1(x + r)},${bottom} Q${x},${bottom} ${x},${round1(bottom - r)} Z`;
+}
+
+function prepareChartData(rows, xField, seriesField) {
+  xField = xField || 'entity_name';
+  const categories = [], catSeen = new Set();
+  for (const r of rows) {
+    const cat = String(r[xField] ?? '');
+    if (!catSeen.has(cat)) { catSeen.add(cat); categories.push(cat); }
+  }
+  if (seriesField) {
+    const names = [], nameSeen = new Set();
+    for (const r of rows) {
+      const s = String(r[seriesField] ?? '');
+      if (!nameSeen.has(s)) { nameSeen.add(s); names.push(s); }
+    }
+    const series = names.map(name => {
+      const sample = rows.find(r => String(r[seriesField]) === name) || {};
+      const byCat = {};
+      for (const r of rows) {
+        if (String(r[seriesField]) === name) {
+          const cat = String(r[xField] ?? '');
+          byCat[cat] = (byCat[cat] || 0) + (Number(r.value) || 0);
+        }
+      }
+      return { name, color: getEntityColor(sample.entity_id), values: categories.map(c => (c in byCat ? byCat[c] : null)) };
+    });
+    return { categories, series, showLegend: series.length > 1 };
+  }
+  const values = [], colors = [];
+  for (const cat of categories) {
+    const r = rows.find(r => String(r[xField] ?? '') === cat);
+    values.push(r ? Number(r.value) || 0 : null);
+    colors.push(getEntityColor(r ? r.entity_id : null));
+  }
+  return { categories, series: [{ name: null, values, colors }], showLegend: false };
+}
+
+function renderEmpty(container, message) {
+  container.innerHTML = `<div class="placeholder"><span class="placeholder-icon">◌</span><div>${escapeHtml(message)}</div></div>`;
+}
+function renderError(container, message) {
+  container.innerHTML = `<div class="error-card"><strong>Query error</strong> — ${escapeHtml(message)}</div>`;
+}
+function renderPlaceholder(container, note, rowCount, status) {
+  const extra = status === 'placeholder-empty' ? ` (query returns ${rowCount} row${rowCount === 1 ? '' : 's'} today)` : '';
+  container.innerHTML = `<div class="placeholder"><span class="placeholder-icon">◌</span><div>${escapeHtml(note || 'Not available yet.')}${escapeHtml(extra)}</div></div>`;
+}
+function renderStatTiles(container, rows, format, labelFields) {
+  if (!rows.length) { renderEmpty(container, 'No rows for this view.'); return; }
+  const tiles = rows.map(r => {
+    const label = labelFields.map(f => r[f]).filter(v => v !== null && v !== undefined).join(' · ');
+    return `<div class="stat-tile"><div class="stat-label">${escapeHtml(label)}</div>` +
+           `<div class="stat-value">${escapeHtml(fmtValue(format, r.value, r.currency))}</div>` +
+           (r.source ? `<div class="stat-note">${escapeHtml(r.source)}</div>` : '') + `</div>`;
+  }).join('');
+  container.innerHTML = `<div class="stat-grid">${tiles}</div>`;
+}
+function renderTable(container, columns, rows) {
+  if (!rows.length) { renderEmpty(container, 'No rows for this view.'); return; }
+  const cols = columns.filter(c => c !== 'entity_id');
+  const thead = cols.map(c => `<th>${escapeHtml(prettyCol(c))}</th>`).join('');
+  const tbody = rows.map(r => `<tr>${cols.map(c => {
+    const badge = (c === 'is_major_variance' || c === 'is_breached') && r[c] ? '<span class="badge badge-critical">FLAG</span>' : '';
+    return `<td>${escapeHtml(formatCell(c, r[c]))}${badge}</td>`;
+  }).join('')}</tr>`).join('');
+  container.innerHTML = `<div class="table-wrap"><table><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table></div>`;
+}
+function renderBarChart(container, data, format) {
+  const { categories, series, showLegend } = data;
+  if (!categories.length) { renderEmpty(container, 'No rows for this view.'); return; }
+  const width = 640, topPad = 16, chartHeight = 180, axisPad = 26;
+  const svgHeight = topPad + chartHeight + axisPad;
+  const allVals = series.flatMap(s => s.values.filter(v => v !== null && v !== undefined));
+  const maxVal = Math.max(0, ...allVals, 0.0001);
+  const minVal = Math.min(0, ...allVals);
+  const range = (maxVal - minVal) || 1;
+  const plotLeft = 8, plotRight = width - 8;
+  const bandW = (plotRight - plotLeft) / categories.length;
+  const barThick = Math.max(4, Math.min(24, (bandW - 10) / Math.max(1, series.length)));
+  function yFor(v) { return topPad + chartHeight - ((v - minVal) / range) * chartHeight; }
+  const zeroY = yFor(0);
+
+  let bars = '';
+  categories.forEach((cat, ci) => {
+    const groupW = series.length * barThick + (series.length - 1) * 2;
+    const groupX = plotLeft + ci * bandW + (bandW - groupW) / 2;
+    series.forEach((s, si) => {
+      const v = s.values[ci];
+      if (v === null || v === undefined) return;
+      const x = groupX + si * (barThick + 2);
+      const y0 = zeroY, y1 = yFor(v);
+      const top = Math.min(y0, y1), h = Math.max(1, Math.abs(y1 - y0));
+      const roundTop = v >= 0;
+      const color = s.color || (s.colors ? s.colors[ci] : 'var(--series-1)');
+      const label = (s.name ? `${cat} · ${s.name}` : cat) + ': ' + fmtValue(format, v, null);
+      bars += `<path d="${barPath(x, top, barThick, h, 4, roundTop)}" fill="${color}"><title>${escapeHtml(label)}</title></path>`;
+    });
+  });
+  let xLabels = '';
+  categories.forEach((cat, ci) => {
+    const cx = plotLeft + ci * bandW + bandW / 2;
+    xLabels += `<text x="${round1(cx)}" y="${topPad + chartHeight + 16}" class="axis-label" text-anchor="middle">${escapeHtml(truncateLabel(cat))}</text>`;
+  });
+  const legend = showLegend
+    ? `<div class="legend">${series.map(s => `<span class="legend-item"><span class="swatch" style="background:${s.color}"></span>${escapeHtml(s.name)}</span>`).join('')}</div>`
+    : '';
+  container.innerHTML =
+    `<svg viewBox="0 0 ${width} ${svgHeight}" class="chart-svg" role="img" aria-label="chart">` +
+    `<line x1="${plotLeft}" y1="${round1(zeroY)}" x2="${plotRight}" y2="${round1(zeroY)}" class="baseline" />` +
+    bars + xLabels + `</svg>${legend}`;
+}
+
+function render() {
+  const view = DASHBOARD.views.find(v => v.id === currentViewId) || DASHBOARD.views[0];
+  const main = document.getElementById('dashboard-main');
+  main.innerHTML = '';
+  for (const section of DASHBOARD.sections) {
+    const sectionEl = document.createElement('section');
+    sectionEl.className = 'dash-section';
+    sectionEl.innerHTML = `<h2>${escapeHtml(section.title)}</h2>` +
+      (section.intro ? `<p class="section-intro">${escapeHtml(section.intro)}</p>` : '');
+    const grid = document.createElement('div');
+    grid.className = 'metric-grid';
+    for (const metric of section.metrics) {
+      const card = document.createElement('article');
+      card.className = 'metric-card';
+      const isPlaceholder = metric.status === 'placeholder-no-source' || metric.status === 'placeholder-empty';
+      card.innerHTML = `<h3>${escapeHtml(metric.title)}</h3>` +
+        `<p class="metric-def">${escapeHtml(metric.definition || '')}</p>` +
+        `<div class="metric-body"></div>` +
+        (metric.note && !isPlaceholder ? `<p class="metric-note">${escapeHtml(metric.note)}</p>` : '');
+      const body = card.querySelector('.metric-body');
+      if (metric.error) {
+        renderError(body, metric.error);
+      } else if (isPlaceholder) {
+        renderPlaceholder(body, metric.note, metric.row_count, metric.status);
+      } else {
+        const rows = (metric.rows || []).filter(r => isRowVisible(r, view));
+        if (metric.chart === 'table') {
+          renderTable(body, metric.columns, rows);
+        } else if (metric.chart === 'stat') {
+          const labelFields = (metric.label_field || 'entity_name').split(',').map(s => s.trim());
+          renderStatTiles(body, rows, metric.format, labelFields);
+        } else {
+          renderBarChart(body, prepareChartData(rows, metric.x_field, metric.series_field), metric.format);
+        }
+      }
+      grid.appendChild(card);
+    }
+    sectionEl.appendChild(grid);
+    main.appendChild(sectionEl);
+  }
+}
+
+function init() {
+  const select = document.getElementById('view-select');
+  select.innerHTML = DASHBOARD.views.map(v => `<option value="${v.id}">${escapeHtml(v.label)}</option>`).join('');
+  select.value = currentViewId;
+  select.addEventListener('change', () => { currentViewId = select.value; render(); });
+
+  const fresh = document.getElementById('freshness-note');
+  const asOf = DASHBOARD.data_as_of ? new Date(DASHBOARD.data_as_of).toLocaleDateString() : 'unknown';
+  const gen = new Date(DASHBOARD.generated_at).toLocaleString();
+  fresh.textContent = `Data as of ${asOf} · Generated ${gen} · Rebuild with: python dashboards/claude_html/generate.py`;
+
+  render();
+}
+init();
+</script>
+</body>
+</html>

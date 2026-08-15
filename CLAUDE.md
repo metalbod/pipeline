@@ -18,7 +18,12 @@ source of truth for the tech stack, data model, and phased roadmap.
   `view` — the plugin registers an ephemeral in-process relation that a view's lazy re-query can't
   see from a fresh connection.
 - Data quality: Pandera (dataframe contracts) + dbt tests (business rules)
-- Dashboards: Streamlit (`/dashboards/streamlit_app`) + Superset/Metabase for self-serve
+- Dashboards: a Claude-generated static HTML executive dashboard (`/dashboards/claude_html`,
+  config in `config/dashboard.md`, rebuilt with `generate.py`) + Superset/Metabase for self-serve.
+  The Streamlit stub is superseded by this. See `dashboards/claude_html/config/dashboard.md` for
+  the access-control model — it reuses `user_entity_access`/`dim_entity`, the same source Superset's
+  RLS reads, but the switcher it drives is a client-side display filter, not per-session
+  enforcement; treat where the generated HTML file is hosted/shared as the actual control point.
 
 # Commands Claude can't guess
 
@@ -28,6 +33,8 @@ source of truth for the tech stack, data model, and phased roadmap.
 - `pytest data_quality/` — run Pandera schema tests
 - `pytest ingestion/` — run ingestion connector unit tests (mocked HTTP via `respx`, no live
   credentials needed)
+- `python dashboards/claude_html/generate.py` — rebuild the executive dashboard HTML from Gold
+  (run after `dbt build` so it picks up fresh data)
 
 # Non-negotiable rules
 
