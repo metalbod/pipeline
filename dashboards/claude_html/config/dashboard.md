@@ -58,10 +58,20 @@ Each metric is a `### Heading` under a `## Section` with these fields, then an o
 - `LabelField` (stat charts only): comma-separated columns concatenated to form each
   tile's label.
 
-Why `bar` and not `line` for daily trends: ingestion here is monthly-batch (Xero syncs
-+ month-end file uploads), so a "daily" series is real days with real gaps between
-batch-load dates, not a continuous signal — connecting them with a line would imply
-continuity that isn't there. Bars per batch-load day are the honest rendering.
+Why `bar` and not `line` for trends: ingestion here is monthly-batch (Xero syncs +
+month-end file uploads), so a series is real batch-load dates with real gaps between
+them, not a continuous signal — connecting them with a line would imply continuity
+that isn't there.
+
+Two rendering rules `generate.py` applies to every `SeriesField` bar chart, not
+something to configure per metric:
+- **Latest period wins, not a sum.** When a chart cell (one category × one series)
+  has multiple rows behind it — e.g. 12 months of history behind one entity's bar —
+  the most recent period is shown, not a sum across history. Summing a percentage or
+  a point-in-time balance across periods would be meaningless.
+- **Top 7 entities + "Other" fold.** The categorical palette has 8 colorblind-safe
+  slots. A chart with more than 7 series folds the smallest (by magnitude) into a
+  single "Other (N)" series rather than let colors start repeating across entities.
 
 ---
 
@@ -76,9 +86,10 @@ A CFO's primary rule is to ensure the organization never runs out of money.
 - Chart: bar
 - Definition: Consolidated cash balance (GS-1000, Cash and Bank) by entity, plus the
   group-consolidated total.
-- Note: "Consolidated" here means summed across subsidiaries in the Gold layer, not
-  real-time — it reflects the most recent closed batch load, not a live bank feed.
-  There's no per-bank-account dimension in the schema yet, only the GL cash balance.
+- Note: Shows each entity's latest available period, not a sum across history —
+  "consolidated" means summed across subsidiaries in the Gold layer, not real-time. It
+  reflects the most recent closed batch load, not a live bank feed. There's no
+  per-bank-account dimension in the schema yet, only the GL cash balance.
 
 ```sql
 select entity_id, entity_name, fiscal_year, fiscal_period, period_end, amount as value,
@@ -97,31 +108,35 @@ where group_standard_code = 'GS-1000'
 order by entity_id, fiscal_year, fiscal_period
 ```
 
-### Daily Cash Burn Rate / Run Rate
+### Cash Burn Rate / Run Rate (Monthly)
 
 - Status: live
 - Format: currency
 - Chart: bar
-- XField: posted_at
+- XField: period_label
 - SeriesField: entity_name
-- Definition: Net movement in cash & equivalents (GS-1000) per day, by entity —
+- Definition: Net movement in cash & equivalents (GS-1000) per month, by entity —
   debits (cash in) minus credits (cash out).
-- Note: Batch-cadence data, not a live feed — see the format note above. Days without
-  a posted journal line simply don't appear rather than showing as zero.
+- Note: Originally scoped as a daily figure, aggregated to monthly here — with a full
+  year of history behind each entity, a day-level x-axis (~26+ distinct dates, each
+  split across up to a dozen entities) stops being readable, and monthly is the same
+  grain every other trend metric on this dashboard already uses. Batch-cadence data
+  either way, not a live feed.
 
 ```sql
 select
     j.entity_id,
     e.entity_name,
-    j.posted_at,
+    strftime(j.posted_at, '%Y-%m') as period_label,
+    date_trunc('month', j.posted_at)::date as period_start,
     sum(j.debit_amount - j.credit_amount) as value,
     e.functional_currency as currency
 from main_silver.fct_journal_line j
 join main_silver.dim_account_group_standard a on a.account_key = j.account_key
 join main_silver.dim_entity e on e.entity_id = j.entity_id
 where a.group_standard_code = 'GS-1000'
-group by 1, 2, 3, 5
-order by 1, 3
+group by 1, 2, 3, 4, 6
+order by period_start, entity_id
 ```
 
 ### Available Liquidity
@@ -149,7 +164,8 @@ Tracks how efficiently the company's short-term assets and liabilities are circu
 - Definition: Average days to collect receivables — a rapid view of collections
   efficiency; a sudden spike indicates potential customer defaults or credit-policy
   issues.
-- Note: `dso_days_true` (invoice-weighted, from AR aging) is null until enough aging
+- Note: Shows each entity's latest available period, not a sum across history.
+  `dso_days_true` (invoice-weighted, from AR aging) is null until enough aging
   history accumulates — the chart falls back to `dso_days_approx` (balance-based) in
   the meantime and labels which one it's showing.
 
@@ -168,7 +184,8 @@ order by entity_id, fiscal_year, fiscal_period
 - Chart: bar
 - Definition: Average days to pay suppliers — monitors whether payment terms are being
   optimized without straining vendor relationships.
-- Note: Same approx/true fallback as DSO above.
+- Note: Shows each entity's latest available period, not a sum across history. Same
+  approx/true fallback as DSO above.
 
 ```sql
 select entity_id, entity_name, fiscal_year, fiscal_period, period_end,
@@ -200,33 +217,36 @@ order by entity_id, overdue_rank
 While backward-looking figures are managed monthly, forward-looking metrics flag
 top-line issues early.
 
-### Daily / Week-to-Date Revenue
+### Revenue Trend (Monthly)
 
 - Status: live
 - Format: currency
 - Chart: bar
-- XField: posted_at
+- XField: period_label
 - SeriesField: entity_name
-- Definition: Revenue (GS-4000 and other REVENUE-type accounts) recognized per day, by
+- Definition: Revenue (GS-4000 and other REVENUE-type accounts) recognized per month, by
   entity.
-- Note: Shown as a trend only, not "contrasted against the month's target" as originally
-  scoped — `rpt_budget_variance` is monthly-grain, so a day/week-to-date-vs-prorated-target
-  comparison would require inventing a proration assumption nothing else in the codebase
-  makes. See Major Budget Variances below for the real (monthly) budget comparison.
+- Note: Originally scoped as a daily/week-to-date figure; aggregated to monthly for the
+  same readability reason as Cash Burn Rate above. Not "contrasted against the month's
+  target" as originally scoped either — `rpt_budget_variance` and this trend are both
+  monthly now, but proration to a partial-month target would require an assumption
+  nothing else in the codebase makes. See Major Budget Variances below for the real
+  budget comparison.
 
 ```sql
 select
     j.entity_id,
     e.entity_name,
-    j.posted_at,
+    strftime(j.posted_at, '%Y-%m') as period_label,
+    date_trunc('month', j.posted_at)::date as period_start,
     sum(j.credit_amount - j.debit_amount) as value,
     e.functional_currency as currency
 from main_silver.fct_journal_line j
 join main_silver.dim_account_group_standard a on a.account_key = j.account_key
 join main_silver.dim_entity e on e.entity_id = j.entity_id
 where a.account_type = 'REVENUE'
-group by 1, 2, 3, 5
-order by 1, 3
+group by 1, 2, 3, 4, 6
+order by period_start, entity_id
 ```
 
 ### Sales Pipeline Velocity
@@ -238,7 +258,8 @@ order by 1, 3
 - SeriesField: entity_name
 - Definition: Total contract value (TCV) and deal count by pipeline stage, per entity,
   with the period-over-period TCV change so a slowdown is visible directly.
-- Note: Finance-entered pipeline estimate (monthly file upload), not live CRM data.
+- Note: Shows each entity/stage's latest available period, not a sum across history.
+  Finance-entered pipeline estimate (monthly file upload), not live CRM data.
 
 ```sql
 select entity_id, entity_name, fiscal_year, fiscal_period, period_end,
@@ -283,6 +304,9 @@ order by entity_id, fiscal_year, fiscal_period
 - SeriesField: entity_name
 - Definition: Budgeted vs. actual by entity/account/period; flagged as a major variance
   when more than 15% off budget (a first-cut threshold, not an audited policy).
+- Note: Chart shows each entity/account's latest available period, not a sum across
+  history — summing a percentage across periods isn't meaningful. Full history for
+  every period is still in the table view / underlying data, just not this chart.
 
 ```sql
 select b.entity_id, b.period, b.group_standard_code, b.account_name, b.account_type,

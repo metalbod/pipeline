@@ -16,6 +16,7 @@ Run via: python scripts/seed_demo_data.py
 """
 
 import random
+import sys
 import uuid
 from datetime import date, datetime, timezone
 
@@ -101,7 +102,7 @@ def _project_financials(base_revenue, growth_rate, margin_pct, opex_pct, periods
     return trajectory
 
 
-def _journal_lines_rows(entity_id, source_system, cash_code, currency, trajectory, loan_multiplier):
+def _journal_lines_rows(entity_id, source_system, cash_code, currency, trajectory, loan_multiplier, skip_loan=False):
     now = datetime.now(timezone.utc)
     rows = []
 
@@ -159,7 +160,7 @@ def _journal_lines_rows(entity_id, source_system, cash_code, currency, trajector
         emit(je, 0, AP_CODE, "Accounts Payable", pay, 0, posted_late, "Vendor payments")
         emit(je, 1, cash_code, "Cash/Bank", 0, pay, posted_late, "Vendor payments")
 
-        if i == 0:
+        if i == 0 and not skip_loan:
             je = f"JE-{entity_id}-{y}{m:02d}-LOAN"
             emit(je, 0, cash_code, "Cash/Bank", loan_principal, 0, posted_early, "Term loan drawdown")
             emit(je, 1, LOAN_CODE, "External Bank Loans", 0, loan_principal, posted_early, "Term loan drawdown")
@@ -325,5 +326,43 @@ def main():
     print(f"ap_aging: {len(all_ap)} rows")
 
 
+def topup_july():
+    """One-off, additive correction -- not part of main()'s bulk backfill, and doesn't touch
+    anything main() already wrote.
+
+    MY-PARENT and SG-SUB were carved out of main()'s 12-month backfill for 2026-07
+    (ENTITIES_WITH_EXISTING_JULY_DATA) because they already had real 2026-07 data from the
+    original Phase 1 pilot fixtures. That carve-out left July at the original pilot's tiny
+    scale ($1,000/$1,500 revenue) while these two entities' other 11 months carry the full
+    synthetic trajectory (tens of thousands/month) -- and since fct_balance's closing_balance
+    is a *cumulative* running total, July's AR balance still reflects 11 months of
+    trajectory-scale growth. Dividing that balance by July's tiny revenue in rpt_dso_dpo
+    produced a nonsensical days-outstanding figure (MY-PARENT: 1,476.7 days).
+
+    Bronze is append-only, so the original pilot fixture can't be removed or rescaled --
+    this appends a trajectory-scaled July on top of it instead. The original fixture's
+    $1-3k becomes immaterial next to the ~$50k trajectory-scale entry, which is enough to
+    bring AR growth and revenue back into the same scale for July.
+
+    Run via: python scripts/seed_demo_data.py --topup-july
+    """
+    all_journal_lines = []
+    for entity_id in ("MY-PARENT", "SG-SUB"):
+        source_system, cash_code, currency, base_revenue, growth_rate, margin_pct, opex_pct, _loan_mult = ENTITIES[entity_id]
+        trajectory = _project_financials(base_revenue, growth_rate, margin_pct, opex_pct, PERIODS)
+        july = trajectory[-1:]  # full 12-period trajectory computed so July's growth exponent
+        # (i=11) is correct; only the last entry is actually emitted.
+        rows = _journal_lines_rows(entity_id, source_system, cash_code, currency, july, loan_multiplier=0, skip_loan=True)
+        all_journal_lines.extend(rows)
+        print(f"{entity_id}: topping up July 2026 with {len(rows)} journal lines "
+              f"(revenue={july[0]['revenue']:.2f}, cogs={july[0]['cogs']:.2f}, opex={july[0]['opex']:.2f})")
+
+    write_bronze("journal_lines", pa.Table.from_pylist(all_journal_lines, schema=JOURNAL_LINES_SCHEMA))
+    print(f"journal_lines: {len(all_journal_lines)} rows appended")
+
+
 if __name__ == "__main__":
-    main()
+    if "--topup-july" in sys.argv:
+        topup_july()
+    else:
+        main()

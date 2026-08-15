@@ -414,6 +414,22 @@ function barPath(x, top, w, h, r, roundTop) {
          `L${round1(x + r)},${bottom} Q${x},${bottom} ${x},${round1(bottom - r)} Z`;
 }
 
+const MAX_CHART_SERIES = 7; // + one "Other" fold = 8, matching the 8-slot categorical palette
+
+// When a (category, series) cell has more than one row -- e.g. 12 months of history behind
+// one entity/account bar -- the *latest* period is what a snapshot chart should show, not a
+// sum (summing 12 months of a percentage or a point-in-time balance is meaningless). Callers
+// pass rows pre-sorted chronologically (every query below orders by period), so "last row for
+// this cell" is "latest period for this cell".
+function latestByCell(rows, xField, seriesField) {
+  const cell = new Map();
+  for (const r of rows) {
+    const key = String(r[xField] ?? '') + ' ' + (seriesField ? String(r[seriesField] ?? '') : '');
+    cell.set(key, r); // later rows overwrite earlier ones
+  }
+  return cell;
+}
+
 function prepareChartData(rows, xField, seriesField) {
   xField = xField || 'entity_name';
   const categories = [], catSeen = new Set();
@@ -421,28 +437,50 @@ function prepareChartData(rows, xField, seriesField) {
     const cat = String(r[xField] ?? '');
     if (!catSeen.has(cat)) { catSeen.add(cat); categories.push(cat); }
   }
+  const cell = latestByCell(rows, xField, seriesField);
+
   if (seriesField) {
-    const names = [], nameSeen = new Set();
+    const totals = new Map();
     for (const r of rows) {
       const s = String(r[seriesField] ?? '');
-      if (!nameSeen.has(s)) { nameSeen.add(s); names.push(s); }
+      totals.set(s, (totals.get(s) || 0) + Math.abs(Number(r.value) || 0));
+    }
+    let names = [...totals.keys()];
+    let otherNames = [];
+    if (names.length > MAX_CHART_SERIES) {
+      names.sort((a, b) => totals.get(b) - totals.get(a));
+      otherNames = names.slice(MAX_CHART_SERIES);
+      names = names.slice(0, MAX_CHART_SERIES);
     }
     const series = names.map(name => {
       const sample = rows.find(r => String(r[seriesField]) === name) || {};
-      const byCat = {};
-      for (const r of rows) {
-        if (String(r[seriesField]) === name) {
-          const cat = String(r[xField] ?? '');
-          byCat[cat] = (byCat[cat] || 0) + (Number(r.value) || 0);
-        }
-      }
-      return { name, color: getEntityColor(sample.entity_id), values: categories.map(c => (c in byCat ? byCat[c] : null)) };
+      return {
+        name, color: getEntityColor(sample.entity_id),
+        values: categories.map(c => {
+          const r = cell.get(c + ' ' + name);
+          return r ? Number(r.value) || 0 : null;
+        }),
+      };
     });
+    if (otherNames.length) {
+      const otherSet = new Set(otherNames);
+      const byCat = {};
+      for (const cat of categories) {
+        let sum = 0, any = false;
+        for (const name of otherNames) {
+          const r = cell.get(cat + ' ' + name);
+          if (r) { sum += Number(r.value) || 0; any = true; }
+        }
+        byCat[cat] = any ? sum : null;
+      }
+      series.push({ name: `Other (${otherNames.length})`, color: 'var(--text-muted)', values: categories.map(c => byCat[c]) });
+    }
     return { categories, series, showLegend: series.length > 1 };
   }
+
   const values = [], colors = [];
   for (const cat of categories) {
-    const r = rows.find(r => String(r[xField] ?? '') === cat);
+    const r = cell.get(cat + ' ');
     values.push(r ? Number(r.value) || 0 : null);
     colors.push(getEntityColor(r ? r.entity_id : null));
   }
