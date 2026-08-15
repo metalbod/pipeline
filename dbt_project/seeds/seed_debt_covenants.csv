@@ -1,0 +1,13 @@
+entity_id,facility_name,covenant_type,threshold_value,currency,effective_from,effective_to,approved_by,approved_at
+MY-PARENT,MY-PARENT Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,MYR,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB,SG-SUB Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,SGD,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-01,MY-SUB-01 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,MYR,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-02,MY-SUB-02 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,MYR,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-03,MY-SUB-03 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,MYR,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-04,MY-SUB-04 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,MYR,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-05,MY-SUB-05 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,MYR,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-06,MY-SUB-06 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,MYR,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-07,MY-SUB-07 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,MYR,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+MY-SUB-08,MY-SUB-08 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,MYR,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-02,SG-SUB-02 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,SGD,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00
+SG-SUB-03,SG-SUB-03 Term Loan Facility,Max Debt-to-Equity Ratio,2.0000,SGD,2025-08-01,,Kenneth Yong,2026-08-15T00:00:00

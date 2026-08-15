@@ -1,3 +1,13 @@
 entity_id,entity_name,parent_entity_id,ownership_pct,functional_currency,country,is_consolidated,effective_from,effective_to
 MY-PARENT,Malaysia Parent Co,,100,MYR,MY,true,2026-08-14,
 SG-SUB,Singapore Subsidiary,MY-PARENT,100,SGD,SG,true,2026-08-14,
+MY-SUB-01,Selangor Trading Sdn Bhd,MY-PARENT,100,MYR,MY,true,2026-08-15,
+MY-SUB-02,Penang Manufacturing Sdn Bhd,MY-PARENT,100,MYR,MY,true,2026-08-15,
+MY-SUB-03,Johor Logistics Sdn Bhd,MY-PARENT,80,MYR,MY,true,2026-08-15,
+MY-SUB-04,Kuala Lumpur Retail Sdn Bhd,MY-PARENT,100,MYR,MY,true,2026-08-15,
+MY-SUB-05,Sabah Resources Sdn Bhd,MY-PARENT,100,MYR,MY,true,2026-08-15,
+MY-SUB-06,Sarawak Energy Services Sdn Bhd,MY-PARENT,100,MYR,MY,true,2026-08-15,
+MY-SUB-07,Melaka Distribution Sdn Bhd,MY-PARENT,75,MYR,MY,true,2026-08-15,
+MY-SUB-08,Ipoh Industrial Sdn Bhd,MY-PARENT,100,MYR,MY,true,2026-08-15,
+SG-SUB-02,Marina Bay Holdings Pte Ltd,MY-PARENT,100,SGD,SG,true,2026-08-15,
+SG-SUB-03,Jurong Logistics Pte Ltd,MY-PARENT,85,SGD,SG,true,2026-08-15,
