@@ -23,6 +23,8 @@ dependencies = [
     "xlsxwriter>=3.2",
     "fastexcel>=0.11",
     "filelock>=3.13",
+    "openmetadata-ingestion[dbt]>=1.12,<1.13",
+    "cachetools>=5.0",  # transitive dep openmetadata-ingestion needs but doesn't declare
 ]
 
 [tool.dagster]

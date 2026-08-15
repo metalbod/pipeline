@@ -145,3 +145,21 @@ models:
               - entity_id
               - counterparty_entity_id
               - effective_from
+
+  - name: user_entity_access
+    description: >
+      Governed user->entity access table (Phase 3 row-level security). Superset's RLS filter on
+      the per-entity Gold datasets reads this table directly. GROUP_FINANCE_OWNER is unrestricted
+      (blank entity_id); REGIONAL_CONTROLLER is scoped to exactly one entity_id.
+    columns:
+      - name: username
+        data_tests:
+          - not_null
+      - name: role
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - GROUP_FINANCE_OWNER
+                  - REGIONAL_CONTROLLER

@@ -27,7 +27,11 @@ storage/*.duckdb.wal
 
 # Secrets / local env
 .env
+.env.*.local
 .secrets/
+
+# Docker bind-mounted runtime state (live DB files, not source)
+ops/openmetadata/docker-volume/
 
 # OS
 .DS_Store

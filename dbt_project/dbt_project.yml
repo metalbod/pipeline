@@ -94,3 +94,12 @@ seeds:
         effective_to: DATE
         approved_by: VARCHAR
         approved_at: TIMESTAMP
+    seed_user_entity_access:
+      +column_types:
+        username: VARCHAR
+        role: VARCHAR
+        entity_id: VARCHAR
+        effective_from: DATE
+        effective_to: DATE
+        approved_by: VARCHAR
+        approved_at: TIMESTAMP

@@ -1,0 +1,64 @@
+# Local-dev Superset stack: Postgres metadata DB + Superset itself (built from ./Dockerfile to
+# add DuckDB support). No Redis/Celery workers -- deliberate simplification for this pilot's low
+# query volume; see superset_config.py.
+#
+# Run from repo root: docker compose -f ops/superset/docker-compose.yml up -d
+# Then, once healthy, bootstrap datasets/roles/RLS/users (idempotent, safe to re-run):
+#   docker exec superset-superset-1 python /app/setup_superset.py
+#
+# Required env vars (see .env.example): SUPERSET_SECRET_KEY, SUPERSET_DB_PASSWORD,
+# SUPERSET_ADMIN_PASSWORD.
+
+services:
+  superset-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: superset
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: ${SUPERSET_DB_PASSWORD:?SUPERSET_DB_PASSWORD must be set}
+    volumes:
+      - superset_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U superset"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  superset-init:
+    build: .
+    depends_on:
+      superset-db:
+        condition: service_healthy
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:?SUPERSET_SECRET_KEY must be set}
+      SUPERSET_DB_PASSWORD: ${SUPERSET_DB_PASSWORD:?SUPERSET_DB_PASSWORD must be set}
+      SUPERSET_ADMIN_PASSWORD: ${SUPERSET_ADMIN_PASSWORD:?SUPERSET_ADMIN_PASSWORD must be set}
+      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
+    volumes:
+      - ./superset_config.py:/app/pythonpath/superset_config.py:ro
+      - ./init.sh:/app/init.sh:ro
+    entrypoint: ["/bin/sh", "/app/init.sh"]
+
+  superset:
+    build: .
+    depends_on:
+      - superset-init
+    ports:
+      - "8088:8088"
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY:?SUPERSET_SECRET_KEY must be set}
+      SUPERSET_DB_PASSWORD: ${SUPERSET_DB_PASSWORD:?SUPERSET_DB_PASSWORD must be set}
+      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
+    volumes:
+      - ./superset_config.py:/app/pythonpath/superset_config.py:ro
+      # NOT Docker `:ro` here -- DuckDB's own read_only connection mode still needs to open the
+      # file for lock acquisition even though it won't write data, and a truly read-only bind
+      # mount blocks that (confirmed: "Cannot open file ... Read-only file system" under `:ro`).
+      # The actual safety property -- Superset never modifies data, dbt/Dagster keep the
+      # read-write connection -- comes from `?access_mode=read_only` in the SQLAlchemy URI
+      # (setup_superset.py), not from the mount flag.
+      - ../../storage/warehouse.duckdb:/app/warehouse.duckdb
+      - ./setup_superset.py:/app/setup_superset.py:ro
+
+volumes:
+  superset_db_data:

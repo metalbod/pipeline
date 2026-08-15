@@ -1,0 +1,29 @@
+# OpenMetadata dbt ingestion workflow config -- officially-supported path (unlike the DuckDB
+# live connector, spiked separately in ops/openmetadata/duckdb_connector_spike.md). Reads the
+# dbt manifest/catalog/run_results produced by `dbt build` and attaches models, lineage, docs,
+# and test results onto the `finance_platform_duckdb` database service in OpenMetadata's catalog.
+#
+# Run: metadata ingest -c ops/openmetadata/dbt_ingestion.yaml
+# (after `dbt build` in dbt_project/ -- needs target/manifest.json, catalog.json, run_results.json
+# to exist and be current; see dagster_project/assets/openmetadata_assets.py for the Dagster
+# asset that runs this automatically after each dbt build.)
+source:
+  type: dbt
+  serviceName: finance_platform_duckdb
+  sourceConfig:
+    config:
+      type: DBT
+      dbtConfigSource:
+        dbtConfigType: local
+        dbtCatalogFilePath: ${DBT_TARGET_DIR}/catalog.json
+        dbtManifestFilePath: ${DBT_TARGET_DIR}/manifest.json
+        dbtRunResultsFilePath: ${DBT_TARGET_DIR}/run_results.json
+sink:
+  type: metadata-rest
+  config: {}
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: ${OPENMETADATA_BASE_URL}
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OPENMETADATA_JWT_TOKEN}
