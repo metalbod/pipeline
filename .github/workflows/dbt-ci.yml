@@ -22,11 +22,15 @@ jobs:
         working-directory: dbt_project
         run: dbt deps
 
+      - name: Seed Bronze demo data
+        run: |
+          mkdir -p storage
+          python scripts/seed_demo_data.py
+
       - name: dbt build && dbt test
         working-directory: dbt_project
         env:
           DUCKDB_PATH: ../storage/warehouse.duckdb
         run: |
-          mkdir -p ../storage
           dbt build
           dbt test
