@@ -1,9 +1,7 @@
 -- Actual debt-to-equity ratio vs. the seeded covenant threshold, headroom %, and a breach flag.
--- Empty today -- debt_covenants (Silver) has zero rows until a real facility exists, and
--- GS-2100 (External Bank Loans) has zero postings either way. This model assumes every covenant
--- row is a maximum-debt-to-equity-ratio constraint; there was no existing convention in the
--- codebase for modeling different covenant_type formulas, so that's a first-cut simplification
--- to revisit once a real facility (and its actual covenant terms) exists.
+-- This model assumes every covenant row is a maximum-debt-to-equity-ratio constraint; there was
+-- no existing convention in the codebase for modeling different covenant_type formulas, so
+-- that's a first-cut simplification to revisit if a covenant with a different formula is added.
 --
 -- Effective-dated: a covenant only applies to periods within its [effective_from, effective_to)
 -- window, same convention as coa_mapping/intercompany_accounts -- without this, a covenant

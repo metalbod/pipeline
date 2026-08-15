@@ -1,6 +1,6 @@
 -- Governed debt-covenant terms (Finance-maintained), same passthrough pattern as
--- intercompany_accounts.sql. Empty today -- no real debt facility exists yet (see
--- seed_debt_covenants.csv header comment context in the Phase 4 plan).
+-- intercompany_accounts.sql. One row per entity's facility (Phase 5 demo data) --
+-- terms only (threshold, effective dates), not a transaction-level facility ledger.
 select
     entity_id,
     facility_name,
